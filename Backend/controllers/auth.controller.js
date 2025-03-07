@@ -3,15 +3,14 @@ const generateTokenAndSetCookie = require("../utils/generateCookieAndSetCookie")
 
 async function signupUser(req, res) {
     try {
-        const { firstName, lastName, username, password } = req.body;
+        const { fullName, username, password } = req.body;
 
         let user = await User.findOne({ username })
         if (user) {
             return res.status(200).json({ message: "username already exists" })
         }
         user = await User.create({
-            firstName,
-            lastName,
+            fullName,
             username,
             password
         })

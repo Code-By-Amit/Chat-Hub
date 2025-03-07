@@ -1,8 +1,7 @@
 const z = require('zod')
 
 const signupSchema = z.object({
-    firstName: z.string().max(10, { message: "First Name length Should not Be greater than 15" }),
-    lastName: z.string().optional(),
+    fullName: z.string().max(20, { message: "Name length Should not Be greater than 20" }),
     username: z.string()
         .min(3, { message: "Username must be at least 5 characters" })
         .max(10, { message: "Username length should not be greater than 10" }),

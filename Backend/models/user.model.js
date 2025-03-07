@@ -2,14 +2,13 @@ const mongoose = require('mongoose')
 const bcrypt = require('bcrypt')
 
 const userSchama = new mongoose.Schema({
-    firstName: {
+    fullName: {
         type: String,
         trim: true,
         required: true
     },
-    lastName: {
+    bio: {
         type: String,
-        trim: true
     },
     username: {
         type: String,
@@ -28,18 +27,18 @@ const userSchama = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: "User"
     }
-}, {timestamps:true})
+}, { timestamps: true })
 
-userSchama.pre('save',async function(next){
+userSchama.pre('save', async function (next) {
     if (!this.isModified('password')) return next()
-    const hashedPassword =await bcrypt.hash(this.password,10)
+    const hashedPassword = await bcrypt.hash(this.password, 10)
     this.password = hashedPassword;
     next()
 })
 
-userSchama.methods.comparePassword =async function(password){
-    return await bcrypt.compare(password,this.password)
+userSchama.methods.comparePassword = async function (password) {
+    return await bcrypt.compare(password, this.password)
 }
 
-const User = mongoose.model('User',userSchama)
+const User = mongoose.model('User', userSchama)
 module.exports = User

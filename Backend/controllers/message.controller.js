@@ -59,7 +59,7 @@ async function getMessage(req, res) {
             })
         }
 
-        const messages = await Message.find({ chatId: chat._id }).populate('sender', 'profilePicture firstName lastName username')
+        const messages = await Message.find({ chatId: chat._id }).populate('sender', 'profilePicture fullName username')
         res.status(200).json({ messages })
     } catch (error) {
         console.log('Error in getMessage Handeler ', error.message)

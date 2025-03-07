@@ -83,7 +83,7 @@ async function declineFriendRequest(req, res) {
 async function incommingRequests(req, res) {
     try {
         const userId = req.userId;
-        const friendRequest = await FriendRequest.find({ to: userId }).populate('from', 'profilePicture firstName lastName username')
+        const friendRequest = await FriendRequest.find({ to: userId }).populate('from', 'profilePicture fullName username')
         if(friendRequest.length === 0) return res.status(200).json({message:"No Incomming Friend Request"})
         res.status(200).json(friendRequest)
     } catch (error) {
@@ -95,7 +95,7 @@ async function incommingRequests(req, res) {
 async function outgoingRequests(req, res) {
     try {
         const userId = req.userId;
-        const friendRequest = await FriendRequest.find({ from: userId }).populate('to', 'profilePicture firstName lastName username')
+        const friendRequest = await FriendRequest.find({ from: userId }).populate('to', 'profilePicture fullName username')
         if(friendRequest.length === 0) return res.status(200).json({message:"No Incomming Friend Request"})
         res.status(200).json(friendRequest)
     } catch (error) {
