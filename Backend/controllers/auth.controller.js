@@ -15,15 +15,12 @@ async function signupUser(req, res) {
             password
         })
 
-        const token = generateTokenAndSetCookie(user._id, res);
+        generateTokenAndSetCookie(user._id, res);
 
-        const userWithoutPassword = user.toJSON()
-        delete userWithoutPassword.password;
-
-        res.status(201).json({ user: userWithoutPassword, token })
+        res.status(201).json({ message: `Welcome, ${user.fullName}!` })
     } catch (error) {
         console.log('Error in Signup Handeler', error)
-        res.status(500).json({ message: "Internal Server Error",error:error.message})
+        res.status(500).json({ message: "Internal Server Error", error: error.message })
     }
 }
 
@@ -39,15 +36,13 @@ async function loginUser(req, res) {
             return res.status(401).json({ message: "Invalid Credenitals" })
         }
 
-        const token = generateTokenAndSetCookie(user._id, res)
+        generateTokenAndSetCookie(user._id, res)
 
-        const userWithoutPassword = user.toJSON()
-        delete userWithoutPassword.password
-        res.status(200).json({ user: userWithoutPassword, token })
+        res.status(200).json({ message: `Welcome back, ${user.fullName}!` })
 
     } catch (error) {
         console.log('Error in Login Handeler', error)
-        res.status(500).json({ message: "Internal Server Error" ,error:error.message})
+        res.status(500).json({ message: "Internal Server Error", error: error.message })
     }
 }
 

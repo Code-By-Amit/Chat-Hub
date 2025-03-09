@@ -13,7 +13,7 @@ const userRoute = require('./routes/user.routes')
 const PORT = process.env.PORT || 4000
 
 app.use(cors({
-    origin: ['http://localhost:5173'],
+    origin: ['http://localhost:5173',"http://192.168.181.232:5173"],
     credentials: true
 }))
 
@@ -31,7 +31,7 @@ app.get('/', (req, res) => {
     res.status(200).json({ message: "Server is Running" })
 })
 
-server.listen(PORT, (err) => {
+server.listen(PORT,'0.0.0.0', (err) => {
     if (err) throw err
     connectToDB()
     console.log(`Server Started on Port ${PORT}`)

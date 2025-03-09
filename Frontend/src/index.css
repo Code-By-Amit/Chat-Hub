@@ -1,4 +1,6 @@
 @import "tailwindcss";
 :root {
   font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
+  --primary-color: linear-gradient(120deg, #9165f6 0%, #000000 100%); 
 }
+

@@ -7,7 +7,7 @@ function isAuthenticated(req, res, next) {
         if (!token) {
             res.status(401).json({ message: "Token Not Found. Unauthorized" })
         }
-        console.log(process.env.JWT_SECRET)
+       
             const decoded = jwt.verify(token, process.env.JWT_SECRET)
             
             req.userId = decoded.userId;
