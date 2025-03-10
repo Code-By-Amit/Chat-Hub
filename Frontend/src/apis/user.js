@@ -10,3 +10,5 @@ export const fetchAuthUser = (token) => api.get('/auth/me', { headers: { Authori
 export const loginApi = (credential) => api.post("/auth/login", credential).then(res => res.data)
 
 export const signupApi = (formData) => api.post("/auth/signup", formData).then(res => res.data)
+
+export const logoutApi = () => api.post("/auth/logout").then(res => res.data)

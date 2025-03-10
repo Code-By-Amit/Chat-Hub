@@ -20,7 +20,7 @@ const userSchama = new mongoose.Schema({
         type: String,
         required: true
     },
-    profilePicture: {
+    avatar: {
         type: String
     },
     friends: {

@@ -4,7 +4,7 @@ const {isAuthenticated} = require("../middlewares/auth")
 const upload = require('../middlewares/multer')
 
 
-router.post("/update",isAuthenticated,upload.single('profileImage'),updateUser)
+router.post("/update",isAuthenticated,upload.single('avatar'),updateUser)
 
 
 module.exports = router

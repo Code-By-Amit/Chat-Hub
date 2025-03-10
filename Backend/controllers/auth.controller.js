@@ -15,9 +15,9 @@ async function signupUser(req, res) {
             password
         })
 
-        generateTokenAndSetCookie(user._id, res);
+        const token = generateTokenAndSetCookie(user._id, res);
 
-        res.status(201).json({ message: `Welcome, ${user.fullName}!` })
+        res.status(201).json({ message: `Welcome, ${user.fullName}!`, token })
     } catch (error) {
         console.log('Error in Signup Handeler', error)
         res.status(500).json({ message: "Internal Server Error", error: error.message })
@@ -36,9 +36,9 @@ async function loginUser(req, res) {
             return res.status(401).json({ message: "Invalid Credenitals" })
         }
 
-        generateTokenAndSetCookie(user._id, res)
+        const token = generateTokenAndSetCookie(user._id, res)
 
-        res.status(200).json({ message: `Welcome back, ${user.fullName}!` })
+        res.status(200).json({ message: `Welcome back, ${user.fullName}!`, token })
 
     } catch (error) {
         console.log('Error in Login Handeler', error)
@@ -46,4 +46,16 @@ async function loginUser(req, res) {
     }
 }
 
-module.exports = { signupUser, loginUser }
+
+async function logOutUser(req, res) {
+    try {
+        res.clearCookie('token')
+        res.status(200).json({ message: "Logout successful" })
+    } catch (error) {
+        console.log('Error in Login Handeler', error)
+        res.status(500).json({ message: "Internal Server Error", error: error.message })
+    }
+}
+
+
+module.exports = { signupUser, loginUser, logOutUser }

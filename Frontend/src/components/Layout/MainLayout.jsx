@@ -4,7 +4,7 @@ import { SideBar } from '../UI/SideBar'
 
 export const MainLayout = () => {
     return (
-        <div className='h-screen flex w-full'>
+        <div className='h-screen flex flex-col-reverse md:flex-row w-full'>
             <SideBar />
             <Outlet />
         </div>

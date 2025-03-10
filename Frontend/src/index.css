@@ -1,6 +1,17 @@
 @import "tailwindcss";
 :root {
   font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
-  --primary-color: linear-gradient(120deg, #9165f6 0%, #000000 100%); 
 }
 
+@theme{
+  --primary-color: #fff;
+}
+
+
+.top-shadow{
+  box-shadow: rgba(149, 157, 165, 0.2) 0px -4px 20px 0px;
+}
+
+.custom-scrollbar{
+ @apply [&::-webkit-scrollbar]:w-1 [&::-webkit-scrollbar-thumb]:rounded [&::-webkit-scrollbar-track]:bg-gray-100 [&::-webkit-scrollbar-thumb]:bg-orange-400
+}

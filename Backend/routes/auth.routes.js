@@ -1,4 +1,4 @@
-const { signupUser, loginUser } = require('../controllers/auth.controller')
+const { signupUser, loginUser, logOutUser } = require('../controllers/auth.controller')
 const { isAuthenticated } = require('../middlewares/auth')
 const { validate } = require('../middlewares/validate')
 const User = require('../models/user.model')
@@ -8,6 +8,7 @@ const router = require('express').Router()
 
 router.post('/signup', validate(signupSchema), signupUser)
 router.post('/login', validate(loginSchema), loginUser)
+router.post('/logout', logOutUser)
 router.get('/me', isAuthenticated, async (req, res) => {
     try {
         const user = await User.findById(req.userId).select('-password')

@@ -3,16 +3,20 @@ const { uploadOnCloudinary, deleteFromCloudinary } = require("../utils/uploadOnC
 
 async function updateUser(req, res) {
     try {
-        const { fullName, currentPassword, newPassword, bio } = req.body;
+        const { fullName, username, currentPassword, newPassword, bio } = req.body;
         const userId = req.userId;
 
         const user = await User.findById(userId)
+        const isUsernameExists = await User.findOne({ username })
+        if (isUsernameExists) {
+            return res.status(400).json({ message: "Username Already Exists" })
+        }
 
         if ((currentPassword && !newPassword) || (!currentPassword && newPassword)) {
-            return res.status(200).json({ message: "Please Provide Both Password" })
+            return res.status(400).json({ message: "Please Provide Both Password" })
         }
         if (currentPassword && newPassword) {
-            const isMatch =await user.comparePassword(currentPassword)
+            const isMatch = await user.comparePassword(currentPassword)
             if (!isMatch) return res.status(400).json({ message: "Invalid Password" })
             user.password = newPassword
         }
@@ -26,7 +30,7 @@ async function updateUser(req, res) {
 
         user.fullName = fullName || user.fullName;
         user.bio = bio || user.bio;
-        user.profilePicture = imageUrl || user.profilePicture
+        user.avatar = imageUrl || user.avatar
 
         await user.save()
 
