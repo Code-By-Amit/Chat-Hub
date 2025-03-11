@@ -79,13 +79,11 @@ export const ProfileEdit = () => {
     }
 
     return (
-        <div className='w-full bg-gray-100 flex justify-center items-center h-full'>
+        <div className='w-full bg-gray-100 flex dark:bg-gray-900 justify-center items-center h-full'>
 
             <div className=''>
-                <h1 className='text-2xl text-gray-800 font-semibold text-center mb-3'>Edit Profile</h1>
-                <div className='bg-white p-5 flex'>
-
-
+                <h1 className='text-2xl text-gray-800 font-semibold dark:text-gray-50 text-center mb-3'>Edit Profile</h1>
+                <div className='bg-white p-5 flex dark:bg-gray-700 '>
                     <div className='m-4 w-40 flex justify-start items-center flex-col'>
                         <img className='h-25 w-25 rounded-full mb-2 shadow-2xl' src={previewAvatar ? previewAvatar : avatar} alt="Profile" />
                         {previewAvatar ? <button onClick={handleCanceleUpload} className="cursor-pointer bg-slate-200 font-semibold px-4 py-2 my-4 rounded-lg w-full text-center" > Cancel </button>

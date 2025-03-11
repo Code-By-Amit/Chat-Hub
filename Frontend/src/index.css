@@ -7,6 +7,7 @@
   --primary-color: #fff;
 }
 
+@custom-variant dark (&:where(.dark, .dark *));
 
 .top-shadow{
   box-shadow: rgba(149, 157, 165, 0.2) 0px -4px 20px 0px;

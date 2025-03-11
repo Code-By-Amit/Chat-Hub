@@ -45,6 +45,7 @@ async function sendFriendRequest(req, res) {
 async function acceptFriendRequest(req, res) {
     try {
         const { requestId } = req.body;
+        console.log("requset body",req.body)
 
         const friendRequest = await FriendRequest.findByIdAndDelete(requestId)
 
@@ -62,7 +63,7 @@ async function acceptFriendRequest(req, res) {
             members: [friendRequest.to, friendRequest.from]
         })
 
-        res.status(200).json({ message: "Friend Request Accepted Sucessfully." })
+        res.status(200).json({ message: "Friend Request Accepted" })
 
     } catch (error) {
         console.log('Error in acceptFriendRequest Handeler ', error.message)
@@ -73,7 +74,7 @@ async function declineFriendRequest(req, res) {
     try {
         const { requestId } = req.body;
         const friendRequest = await FriendRequest.findByIdAndDelete(requestId)
-        res.status(200).json({ message: "Friend Request Decliend Sucessfully." })
+        res.status(200).json({ message: "Friend Request Decliend" })
     } catch (error) {
         console.log('Error in declineFriendRequest Handeler ', error.message)
         res.status(500).json({ message: "Internal Server Error", error: error.message })
@@ -83,7 +84,7 @@ async function declineFriendRequest(req, res) {
 async function incommingRequests(req, res) {
     try {
         const userId = req.userId;
-        const friendRequest = await FriendRequest.find({ to: userId }).populate('from', 'profilePicture fullName username')
+        const friendRequest = await FriendRequest.find({ to: userId }).populate('from', 'avatar fullName username')
         if(friendRequest.length === 0) return res.status(200).json({message:"No Incomming Friend Request"})
         res.status(200).json(friendRequest)
     } catch (error) {

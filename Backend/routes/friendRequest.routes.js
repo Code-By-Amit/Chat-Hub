@@ -7,6 +7,6 @@ router.post('/send', isAuthenticated, sendFriendRequest)
 router.post('/accept', isAuthenticated, acceptFriendRequest)
 router.post('/decline', isAuthenticated, declineFriendRequest)
 router.get('/incomming', isAuthenticated, incommingRequests)
-router.get('/incomming', isAuthenticated, outgoingRequests)
+router.get('/outgoing', isAuthenticated, outgoingRequests)
 
 module.exports = router

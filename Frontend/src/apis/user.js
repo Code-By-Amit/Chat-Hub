@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const api = axios.create({
-    baseURL: "http://192.168.181.232:3000",
+    baseURL: import.meta.env.VITE_BACKEND_URL,
     withCredentials: true
 })
 
@@ -12,3 +12,5 @@ export const loginApi = (credential) => api.post("/auth/login", credential).then
 export const signupApi = (formData) => api.post("/auth/signup", formData).then(res => res.data)
 
 export const logoutApi = () => api.post("/auth/logout").then(res => res.data)
+
+export const fetchUserFriends = (token) => api.get("/user/friends", { headers: { Authorization: `Bearer ${token}` } }).then(res => res.data)

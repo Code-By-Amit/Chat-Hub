@@ -44,7 +44,16 @@ async function updateUser(req, res) {
     }
 }
 
+async function getUserFriends(req, res) {
+    try {
+        const userId = req.userId;
+        const friends = await User.findById(userId).populate({ path: 'friends', select: "fullName avatar bio username" }).select('friends')
+        res.status(200).json(friends)
+    } catch (error) {
+        console.log('Error in getUserFriends Handeler ', error.message)
+        res.status(500).json({ message: "Internal Server Error", error: error.message })
+    }
+}
 
 
-
-module.exports = { updateUser }
+module.exports = { updateUser, getUserFriends }

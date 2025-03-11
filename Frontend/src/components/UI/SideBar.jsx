@@ -15,11 +15,9 @@ export const SideBar = () => {
     useEffect(() => {
         if (isDarkMode) {
             document.documentElement.classList.add("dark");
-            document.documentElement.setAttribute("data-theme", "dark")
             localStorage.setItem("theme", "dark");
         } else {
             document.documentElement.classList.remove("dark");
-            document.documentElement.setAttribute("data-theme", "light")
             localStorage.setItem("theme", "light");
         }
         console.log(isDarkMode)
@@ -46,7 +44,7 @@ export const SideBar = () => {
 
                     {/* Light/Dark Toggle  */}
                     <div className="relative flex justify-center items-center w-12 h-12 rounded-lg 
-                                  hover:bg-gray-100 dark:hover:bg-gray-700 transition-all text-gray-500 duration-300 cursor-pointer overflow-hidden"
+                                  hover:bg-gray-100 dark:hover:bg-gray-700 dark:text-gray-300 transition-all text-gray-500 duration-300 cursor-pointer overflow-hidden"
                         onClick={() => setIsDarkMode((prev) => !prev)} data-tooltip-id="theme">
 
                         <FiSun className={`absolute transition-all duration-300 ease-in-out 
@@ -59,7 +57,7 @@ export const SideBar = () => {
 
                     <button
                         onClick={() => setShowLogoutModal(true)}
-                        className="flex justify-center items-center hover:bg-gray-100 rounded-lg w-12 h-12 text-red-500 hover:text-red-600 transition-all"
+                        className="flex justify-center items-center hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg w-12 h-12 text-red-500 hover:text-red-600 transition-all"
                         data-tooltip-id="logout"
                     >
                         <FiLogOut size={24} />
@@ -78,11 +76,11 @@ const NavigationLink = ({ icon, to, tooltip, end, screenWidth }) => {
         <NavLink
             end={end}
             to={to}
-            className={({ isActive }) => `flex md:static justify-center items-center w-12 h-12 rounded-lg transition-all ${isActive ? "bg-orange-400 text-white" : "text-gray-500 hover:bg-gray-100"}`}
+            className={({ isActive }) => `flex md:static justify-center items-center w-12 h-12 rounded-lg transition-all ${isActive ? "bg-orange-400 text-white" : "text-gray-500 dark:text-gray-300 dark:hover:bg-gray-600 hover:bg-gray-100"}`}
             data-tooltip-id={tooltip}
         >
             {icon}
-            <Tooltip id={tooltip} className="z-50" place={screenWidth < 1150 ? "right" : "top"}>{tooltip}</Tooltip>
+            <Tooltip id={tooltip} className="z-50 " place={screenWidth < 1150 ? "right" : "top"}>{tooltip}</Tooltip>
         </NavLink>
     );
 };
@@ -101,7 +99,7 @@ const LogoutModal = ({ onClose }) => {
     };
 
     return (
-        <div className="fixed inset-0 flex justify-center items-center bg-black/15 z-50">
+        <div className="fixed inset-0 flex justify-center items-center dark:bg-white/15 bg-black/15 z-50">
             <div className="bg-white p-6 rounded-lg shadow-lg w-80 text-center">
                 <h2 className="text-xl font-semibold text-gray-900">Are you sure?</h2>
                 <p className="text-gray-600 mt-2">Do you really want to logout?</p>

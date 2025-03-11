@@ -23,10 +23,10 @@ const userSchama = new mongoose.Schema({
     avatar: {
         type: String
     },
-    friends: {
+    friends: [{
         type: mongoose.Schema.Types.ObjectId,
         ref: "User"
-    }
+    }]  
 }, { timestamps: true })
 
 userSchama.pre('save', async function (next) {

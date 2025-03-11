@@ -25,11 +25,15 @@ async function sendMessage(req, res) {
             sender: userId
         })
 
-        const memberSocketId = await Promise.all[
-            chat.members.map((member) => getReciverSocketId(member))
-        ]
+        await newMessage.populate('sender');
 
-        memberSocketId.forEach(member => {
+        console.log(chat.members)
+
+        const memberSocketIds = await Promise.all(
+            chat.members.map(member => getReciverSocketId(member)) // Then map and resolve promises
+        );
+        
+        memberSocketIds.forEach(member => {
             io.to(member).emit("newMessage", newMessage)
         });
 
@@ -43,7 +47,7 @@ async function sendMessage(req, res) {
 
 async function getMessage(req, res) {
     try {
-        const { chatId, toUserId } = req.body;
+        const { chatId, toUserId } = req.params;
         const fromUserId = req.userId;
 
         let chat
@@ -55,8 +59,14 @@ async function getMessage(req, res) {
         } else {
             chat = await Chat.findOne({
                 isGroupChat: false,
-                members: { $in: [toUserId, fromUserId] }
+                members: { $all: [toUserId, fromUserId] }
             })
+            if(!chat){
+                chat = await Chat.create({
+                    isGroupChat:false,
+                    members:[toUserId,fromUserId]
+                })
+            }
         }
 
         const messages = await Message.find({ chatId: chat._id }).populate('sender', 'profilePicture fullName username')
