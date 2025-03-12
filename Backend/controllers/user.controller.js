@@ -55,5 +55,16 @@ async function getUserFriends(req, res) {
     }
 }
 
+async function searchUserByName(req, res) {
+    try {
+        const { search, limit=5 } = req.query;
+        console.log(req.query)
+        const users = await User.find({ fullName: RegExp(search, 'i') }).limit(Number(limit))
+        res.status(200).json(users)
+    } catch (error) {
+        console.log('Error in searchUserByName Handeler ', error.message)
+        res.status(500).json({ message: "Internal Server Error", error: error.message })
+    }
+}
 
-module.exports = { updateUser, getUserFriends }
+module.exports = { updateUser, getUserFriends, searchUserByName }

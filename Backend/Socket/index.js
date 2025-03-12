@@ -23,8 +23,16 @@ io.on('connection', (socket) => {
 
     let userId = socket.handshake.query.userId
     if (userId !== 'undefined') userSocketMap[userId] = socket.id;
-    console.log(userSocketMap)
+
     io.emit('getOnlineUsers', Object.keys(userSocketMap))
+
+    socket.on('typing', (data) => {
+        io.to(userSocketMap[data.to]).emit('typing', data.from)
+    })
+
+    socket.on("stopTyping", (data) => {
+        io.to(userSocketMap[data.to]).emit("stopTyping", data.from);
+    });
 
     socket.on('disconnect', (socket) => {
         delete userSocketMap[userId]

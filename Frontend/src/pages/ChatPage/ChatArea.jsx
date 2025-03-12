@@ -5,12 +5,14 @@ import { useMutation, useQuery } from '@tanstack/react-query';
 import { useSocketContext } from '../../context/useSocketContext';
 import { getMessagesApi, sendMessageApi } from '../../apis/chatApis';
 import { authUser } from '../../context/authUser';
+import { useDebounce } from '../../hooks/debounce';
 
-export const ChatArea = ({ currentChatUser }) => {
+export const ChatArea = ({ currentChatUser, setCurrentChatUser }) => {
     const [token, setToken] = useState(localStorage.getItem('token') || null)
     const [inputMessage, setInputMessage] = useState('')
     const { user } = authUser()
-    const { socket } = useSocketContext()
+    const { socket, onlineUsers ,typingStatus} = useSocketContext()
+    const debounceTyping = useDebounce(inputMessage, 1000)
 
     const chatEndRef = useRef()
 
@@ -19,7 +21,8 @@ export const ChatArea = ({ currentChatUser }) => {
         queryFn: () => getMessagesApi(currentChatUser._id, token),
         enabled: !!token && !!currentChatUser
     })
-    
+
+
     const [messages, setMessages] = useState([])
 
     useEffect(() => {
@@ -41,12 +44,14 @@ export const ChatArea = ({ currentChatUser }) => {
             setMessages(prevMsg => ([...prevMsg, {
                 sender: newMessage.sender,
                 message: newMessage.message,
-                createdAt:newMessage.createdAt
+                createdAt: newMessage.createdAt
             }]))
         }
         socket.on('newMessage', handleNewMessage)
 
-        return () => socket.off("newMessage", handleNewMessage);
+        return () => {
+            socket.off("newMessage", handleNewMessage);
+        }
     }, [socket])
 
     useEffect(() => {
@@ -62,24 +67,28 @@ export const ChatArea = ({ currentChatUser }) => {
     const handleSendMessage = (message) => {
         if (message.trim() === "") return
         sendMessageMutation.mutate({ reciverId: currentChatUser._id, message })
+        socket.emit("stopTyping", currentChatUser._id)
     }
 
-    if (isLoadingMessage) return <div>Loading Messages...</div>
-    console.log("conversationData",conversationData)
-    return (    
+    return (
         <>
             {/* Right Message Area  */}
-            <div className='m-2 hidden overflow-clip md:flex dark:bg-gray-700 flex-col bg-white relative box-border flex-1 rounded'>
+            {/* <div className={`md:m-2 ${currentChatUser ? "right-0" : "-right-full"} max-w-dvh absolute overflow-clip md:static max-h-dvh z-10 flex dark:bg-gray-700 flex-col bg-white box-border flex-1 rounded`}> */}
+            <div className={` md:m-2  max-w-full  absolute md:static  max-h-full  z-10  flex  dark:bg-gray-700  flex-col  bg-white  box-border  flex-1  rounded w-full h-full md:w-auto md:h-auto  transition-all duration-500 ease-in-out ${currentChatUser ? "right-0" : "right-full"}`}>
+
 
                 {
                     currentChatUser ?
                         <>
-                            <ProfileBar avatar={currentChatUser.avatar} name={currentChatUser.fullName} isOnline={currentChatUser.isOnline} />
+                            <ProfileBar setCurrentChatUser={setCurrentChatUser} avatar={currentChatUser.avatar} name={currentChatUser.fullName} isOnline={onlineUsers?.includes(currentChatUser?._id)} isTyping={typingStatus.includes(currentChatUser._id)} />
 
                             {/* Message Area */}
                             <div className='w-full flex-1 overflow-auto custom-scrollbar'>
-                                <div className='w-full py-4 px-7 flex flex-col gap-1 justify-end '>
-                                    {
+                                <div className='w-full h-full py-4 px-7 flex flex-col gap-1 justify-end '>
+                                    {isLoadingMessage ?
+                                        (<div className='w-full h-full flex justify-center items-center'>
+                                            <div className="loader"></div>
+                                        </div>) :
                                         messages?.length === 0 ?
 
                                             (
@@ -91,8 +100,14 @@ export const ChatArea = ({ currentChatUser }) => {
                                                 return (
                                                     <>
                                                         <div key={msg?._id} >
-                                                            < div className={`text-base px-3 break-words py-1 rounded-t-lg  ${msg?.sender?._id === user?._id ? "rounded-l-lg justify-self-end bg-orange-400 text-white" : "self-start rounded-r-lg bg-gray-200 dark:bg-gray-500 dark:text-gray-100 text-gray-800"}  max-w-1/3 w-fit`}>
-                                                                <span>{msg?.message}</span>
+                                                            <div className={`flex gap-2 ${msg?.sender?._id === user?._id && "flex-row-reverse"}`}>
+                                                                <div className='w-8 h-8 ring-1 ring-orange-400 ring-offset-2 overflow-clip rounded-full'>
+                                                                    <img className='w-full h-full object-cover' src={msg?.sender?.avatar} alt="" />
+                                                                </div>
+
+                                                                < div className={`text-sm md:text-base px-3 py-2 break-words rounded-t-lg  ${msg?.sender?._id === user?._id ? "rounded-l-lg justify-self-end bg-orange-400 text-white" : "justify-self-start rounded-r-lg bg-gray-200 dark:bg-gray-500 dark:text-gray-100 text-gray-800"}  max-w-1/2 lg:w-fit`}>
+                                                                    <span >{msg?.message}</span>
+                                                                </div>
                                                             </div>
                                                             <p className={`text-xs leading-none mb-2 mt-0.5 font-mono dark:text-gray-100 tracking-tighter text-gray-500 ${msg?.sender._id === user?._id ? "text-right" : "text-left"}`}>{msgTime}</p>
                                                         </div>
@@ -104,12 +119,12 @@ export const ChatArea = ({ currentChatUser }) => {
                                 </div>
                             </div>
 
-                            <MessageInputBox handleSendMessage={handleSendMessage} inputMessage={inputMessage} setInputMessage={setInputMessage} />
+                            <MessageInputBox handleSendMessage={handleSendMessage} inputMessage={inputMessage} setInputMessage={setInputMessage} sendMessageMutation={sendMessageMutation} currentChatUser={currentChatUser} />
                         </>
                         :
-                        <div className=' w-full h-full flex flex-col justify-center items-center'>
-                            <h1 className='text-4xl font-bold text-gray-800 dark:text-gray-100'>Welcome,<span className='text-orange-400'>{user?.fullName}</span> </h1>
-                            <p className='text-base font-semibold text-gray-800 dark:text-gray-100'>Select User To Start Chat.</p>
+                        <div className=' hidden w-full h-full md:flex flex-col gap-3 justify-center items-center'>
+                            <h1 className='text-4xl font-bold text-gray-800 dark:text-gray-100'>Welcome, <span className='text-orange-400'>{user?.fullName}</span> </h1>
+                            <p className='text-lg font-semibold text-gray-800 dark:text-gray-100'>Select User To Start Chat.</p>
                         </div>
                 }
 

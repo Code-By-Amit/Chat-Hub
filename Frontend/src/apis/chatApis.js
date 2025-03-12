@@ -11,6 +11,10 @@ export const getMessagesApi = (toUserId, token) => api.get(`/message/getmessage/
 
 export const fetchIncommingRequest = (token) => api.get('/friendrequest/incomming', { headers: { Authorization: `Bearer ${token}` } }).then(res => res.data)
 
+export const fetchOutgoingRequest = (token) => api.get('/friendrequest/outgoing', { headers: { Authorization: `Bearer ${token}` } }).then(res => res.data)
+
 export const acceptRequest = (requestId, token) => api.post('/friendrequest/accept', {requestId}, { headers: { Authorization: `Bearer ${token}` } }).then(res => res.data)  
 
 export const declineRequest = (requestId, token) => api.post('/friendrequest/decline', {requestId}, { headers: { Authorization: `Bearer ${token}` } }).then(res => res.data)  
+
+export const sendFriendRequest = (toUserId, token) => api.post('/friendrequest/send', {toUserId}, { headers: { Authorization: `Bearer ${token}` } }).then(res => res.data)  

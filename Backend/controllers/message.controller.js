@@ -32,7 +32,7 @@ async function sendMessage(req, res) {
         const memberSocketIds = await Promise.all(
             chat.members.map(member => getReciverSocketId(member)) // Then map and resolve promises
         );
-        
+
         memberSocketIds.forEach(member => {
             io.to(member).emit("newMessage", newMessage)
         });
@@ -61,15 +61,15 @@ async function getMessage(req, res) {
                 isGroupChat: false,
                 members: { $all: [toUserId, fromUserId] }
             })
-            if(!chat){
+            if (!chat) {
                 chat = await Chat.create({
-                    isGroupChat:false,
-                    members:[toUserId,fromUserId]
+                    isGroupChat: false,
+                    members: [toUserId, fromUserId]
                 })
             }
         }
 
-        const messages = await Message.find({ chatId: chat._id }).populate('sender', 'profilePicture fullName username')
+        const messages = await Message.find({ chatId: chat._id }).sort({ createdAt: 1 }).populate('sender', 'avatar fullName username')
         res.status(200).json({ messages })
     } catch (error) {
         console.log('Error in getMessage Handeler ', error.message)

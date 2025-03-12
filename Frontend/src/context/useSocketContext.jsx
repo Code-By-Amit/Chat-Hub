@@ -5,9 +5,9 @@ import { authUser } from "./authUser";
 const SocketContext = createContext()
 
 export const SocketContextProvider = ({ children }) => {
-    const [onlineUsers, setOnlineUsers] = useState()
+    const [typingStatus, setTypingStatus] = useState([])
+    const [onlineUsers, setOnlineUsers] = useState([])
     const [socket, setSocket] = useState(null)
-
     const { user } = authUser()
     const Backend_Url = import.meta.env.VITE_BACKEND_URL;
 
@@ -23,18 +23,40 @@ export const SocketContextProvider = ({ children }) => {
             newSocket.on('getOnlineUsers', (users) => {
                 setOnlineUsers(users)
             })
+
             return () => newSocket.close()
         }
         else {
             if (socket) {
                 socket.close()
                 setSocket(null)
+                setTypingStatus([]);
             }
         }
     }, [user])
 
+    useEffect(() => {
+        if (!socket) return
+        const handleTypingStatus = (whosTyping) => {
+            console.log(whosTyping)
+            setTypingStatus(prev => ([...prev, whosTyping]))
+        }
 
-    return <SocketContext.Provider value={{ socket, onlineUsers }}  >
+        const handleStopTypingStatus = (whoStopTyping) => {
+            console.log("WhosStopTyping: ", whoStopTyping)
+            setTypingStatus((prevTypingUser) => prevTypingUser.filter((userId) => userId !== whoStopTyping))
+        }
+
+        socket.on('typing', handleTypingStatus)
+        socket.on('stopTyping', handleStopTypingStatus)
+        
+        return () => {
+            socket.off("typing", handleTypingStatus);
+            socket.off('stopTyping', handleStopTypingStatus)
+        }
+    }, [socket])
+
+    return <SocketContext.Provider value={{ socket, onlineUsers, typingStatus }}  >
         {children}
     </SocketContext.Provider >
 }

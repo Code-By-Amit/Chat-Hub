@@ -73,7 +73,7 @@ async function acceptFriendRequest(req, res) {
 async function declineFriendRequest(req, res) {
     try {
         const { requestId } = req.body;
-        const friendRequest = await FriendRequest.findByIdAndDelete(requestId)
+         await FriendRequest.findByIdAndDelete(requestId)
         res.status(200).json({ message: "Friend Request Decliend" })
     } catch (error) {
         console.log('Error in declineFriendRequest Handeler ', error.message)
@@ -97,7 +97,7 @@ async function outgoingRequests(req, res) {
     try {
         const userId = req.userId;
         const friendRequest = await FriendRequest.find({ from: userId }).populate('to', 'profilePicture fullName username')
-        if(friendRequest.length === 0) return res.status(200).json({message:"No Incomming Friend Request"})
+        if(friendRequest.length === 0) return res.status(200).json({message:"No Outgoing Friend Request"})
         res.status(200).json(friendRequest)
     } catch (error) {
         console.log('Error in outgoingRequests Handeler ', error.message)
