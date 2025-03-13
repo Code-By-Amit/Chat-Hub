@@ -10,7 +10,7 @@ import { authUser } from '../context/authUser';
 export const Signup = () => {
     const [isPassVisible, setIsPassVisible] = useState(false)
     const [isConfPassVisible, setIsConfPassVisible] = useState(false)
-    const [formData, setFormData] = useState({ username: "", password: "", fullName: "", confPassword: "" })
+    const [formData, setFormData] = useState({ username: "", password: "", fullName: "", confPassword: "", gender: "" })
     const [errors, setErrors] = useState([])
 
     const navigate = useNavigate()
@@ -40,6 +40,9 @@ export const Signup = () => {
         if (formData.confPassword.trim() !== formData.password.trim()) {
             newErrors.push("password and confirm password must be same")
         }
+        if (formData.gender == "") {
+            newErrors.push("Please Select Your Gender")
+        }
 
         setErrors(newErrors)
 
@@ -54,13 +57,14 @@ export const Signup = () => {
         const trimmedData = {
             username: formData.username.trim(),
             password: formData.password.trim(),
-            fullName: formData.fullName.trim()
+            fullName: formData.fullName.trim(),
+            gender: formData.gender.trim()
         }
 
         signupMutation.mutate(trimmedData, {
             onSuccess: () => {
                 navigate('/chat')
-                setFormData({ username: "", password: "", fullName: "", confPassword: "" })
+                setFormData({ username: "", password: "", fullName: "", confPassword: "", gender: "" })
             }
         });
     }
@@ -115,6 +119,16 @@ export const Signup = () => {
                                 <input className='w-full bg-gray-100 rounded outline-none' type={isConfPassVisible ? "text" : "password"} value={formData.confPassword} onChange={handleChange} name='confPassword' placeholder='Confirm Password' />
                                 <div onClick={() => setIsConfPassVisible(!isConfPassVisible)} className='transition duration-300 ease-in-out cursor-pointer'>
                                     {isConfPassVisible ? <LuEye /> : <LuEyeClosed />}
+                                </div>
+                            </div>
+                            <div className=' flex justify-around rounded px-5 py-2 items-center bg-gray-100'>
+                                <div className='flex gap-2 items-center'>
+                                    <input type="radio" name='gender' id='male' value="male" checked={formData.gender == "male"} onChange={handleChange} className='h-4 w-4' />
+                                    <label htmlFor="male" className=' text-sm font-medium text-gray-800'>Male</label>
+                                </div>
+                                <div className='flex gap-2 items-center'>
+                                    <input type="radio" name='gender' id='female' value="female" checked={formData.gender == "female"} onChange={handleChange} className='h-4 w-4' />
+                                    <label htmlFor="female" className='text-sm font-medium text-gray-800'>Female</label>
                                 </div>
                             </div>
                             <div className='leading-1'>

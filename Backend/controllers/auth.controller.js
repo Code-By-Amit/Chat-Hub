@@ -3,16 +3,23 @@ const generateTokenAndSetCookie = require("../utils/generateCookieAndSetCookie")
 
 async function signupUser(req, res) {
     try {
-        const { fullName, username, password } = req.body;
+        const { fullName, username, password ,gender} = req.body;
 
         let user = await User.findOne({ username })
         if (user) {
             return res.status(200).json({ message: "username already exists" })
         }
+
+        let avatar
+        if(gender){
+            let boyOrGirl = gender === 'male' ? 'boy' : 'girl'
+            avatar = `https://avatar.iran.liara.run/public/${boyOrGirl}?username=${username}`
+        }
         user = await User.create({
             fullName,
             username,
-            password
+            password,
+            avatar
         })
 
         const token = generateTokenAndSetCookie(user._id, res);

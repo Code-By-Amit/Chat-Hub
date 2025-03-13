@@ -5,14 +5,12 @@ import { useMutation, useQuery } from '@tanstack/react-query';
 import { useSocketContext } from '../../context/useSocketContext';
 import { getMessagesApi, sendMessageApi } from '../../apis/chatApis';
 import { authUser } from '../../context/authUser';
-import { useDebounce } from '../../hooks/debounce';
 
 export const ChatArea = ({ currentChatUser, setCurrentChatUser }) => {
     const [token, setToken] = useState(localStorage.getItem('token') || null)
     const [inputMessage, setInputMessage] = useState('')
     const { user } = authUser()
     const { socket, onlineUsers, typingStatus } = useSocketContext()
-    const debounceTyping = useDebounce(inputMessage, 1000)
     const [groupedMessages, setGroupedMessages] = useState({});
 
     const chatEndRef = useRef()
@@ -27,7 +25,6 @@ export const ChatArea = ({ currentChatUser, setCurrentChatUser }) => {
     const [messages, setMessages] = useState([])
 
     useEffect(() => {
-        console.log('Current user changed', currentChatUser)
         if (currentChatUser) {
             setMessages([]); // Clear messages before loading new ones
             refetch()
