@@ -4,13 +4,20 @@ import { CiEdit } from 'react-icons/ci'
 import { LuEye, LuEyeClosed } from 'react-icons/lu'
 import { MdOutlinePassword } from 'react-icons/md'
 import { authUser } from '../context/authUser'
-import { form } from 'framer-motion/client'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { editUserProfileApi } from '../apis/user'
+import toast from 'react-hot-toast'
+import { IoArrowBackOutline } from 'react-icons/io5'
+import { useNavigate } from 'react-router-dom'
 
 export const ProfileEdit = () => {
     const [isPassVisible, setIsPassVisible] = useState(false)
     const [isConfPassVisible, setIsConfPassVisible] = useState(false)
     const [formData, setFormData] = useState({ username: "", currentPassword: "", fullName: "", newPassword: "", bio: "" })
     const { user } = authUser()
+    const [token, setToken] = useState(localStorage.getItem('token') || null)
+    const queryClient = useQueryClient()
+    const navigate = useNavigate()
 
     const [errors, setErrors] = useState([])
 
@@ -61,6 +68,31 @@ export const ProfileEdit = () => {
         }
     }
 
+    const profileEditMutation = useMutation({
+        mutationKey: ['profileUpdate'],
+        mutationFn: (data) => editUserProfileApi(data, token),
+        onMutate: () => {
+            const toastId = toast.loading("Updating Profile....")
+            return { toastId }
+        },
+        onSuccess: (data, variable, context) => {
+            toast.dismiss(context.toastId);
+            toast.success(data.message);
+            queryClient.invalidateQueries(['authUser'])
+        },
+        onError: (error, _, context) => {
+            toast.dismiss(context.toastId)
+            if (error.response?.data?.message) {
+                toast.error(error.response?.data?.message)
+            }
+            if (Array.isArray(error.response.data.errors)) {
+                error.response.data.errors.map(error => {
+                    toast.error(error.message)
+                })
+            }
+        }
+    })
+
     const handleFormSubmit = (e) => {
         e.preventDefault()
 
@@ -69,18 +101,19 @@ export const ProfileEdit = () => {
         profileData.append('fullName', user.fullName !== formData.fullName ? formData.fullName : "")
         profileData.append('username', user.username !== formData.username ? formData.username : "")
         profileData.append('bio', user.bio !== formData.bio ? formData.bio : "")
-        profileData.append('currentPassword',formData.currentPassword || "")
-        profileData.append('newPassword',formData.newPassword || "")
-        if(avatar instanceof File){
-            profileData.append('avatar',avatar)
+        profileData.append('currentPassword', formData.currentPassword || "")
+        profileData.append('newPassword', formData.newPassword || "")
+        if (avatar instanceof File) {
+            profileData.append('avatar', avatar)
         }
-
-        console.log([...profileData.entries()])
+        profileEditMutation.mutate(profileData)
     }
 
     return (
-        <div className='w-full bg-gray-100 flex dark:bg-gray-900 justify-center items-center h-full'>
-
+        <div className='w-full relative bg-gray-100 flex dark:bg-gray-900 justify-center items-center h-full'>
+            <div onClick={()=>navigate(-1)} className='absolute top-10 text-gray-800 dark:text-gray-100 bg-gray-300 dark:bg-gray-500 hover:opacity-70 p-2 rounded-full left-10'>
+                <IoArrowBackOutline size={30} />
+                </div>
             <div className=''>
                 <h1 className='text-2xl text-gray-800 font-semibold dark:text-gray-50 text-center mb-3'>Edit Profile</h1>
                 <div className='bg-white p-5 flex dark:bg-gray-700 '>

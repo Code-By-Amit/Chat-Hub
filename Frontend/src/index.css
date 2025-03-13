@@ -1,37 +1,72 @@
 @import "tailwindcss";
+
 :root {
   font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
 }
 
-@theme{
+@theme {
   --primary-color: #fff;
 }
 
 @custom-variant dark (&:where(.dark, .dark *));
 
-.top-shadow{
+.top-shadow {
   box-shadow: rgba(149, 157, 165, 0.2) 0px -4px 20px 0px;
 }
 
-.custom-scrollbar{
- @apply [&::-webkit-scrollbar]:w-1 [&::-webkit-scrollbar-thumb]:rounded [&::-webkit-scrollbar-track]:bg-gray-100 [&::-webkit-scrollbar-thumb]:bg-orange-400
+.custom-scrollbar {
+  @apply [&::-webkit-scrollbar]:w-1 [&::-webkit-scrollbar-thumb]:rounded [&::-webkit-scrollbar-track]:bg-gray-100 [&::-webkit-scrollbar-thumb]:bg-orange-400
 }
 
 /* HTML: <div class="loader"></div> */
 .loader {
   width: 70px;
   aspect-ratio: 2;
-  --_g: no-repeat radial-gradient(circle closest-side,#ff8904 90%,#0000);
-  background: 
-    var(--_g) 0%   50%,
-    var(--_g) 50%  50%,
+  --_g: no-repeat radial-gradient(circle closest-side, #ff8904 90%, #0000);
+  background:
+    var(--_g) 0% 50%,
+    var(--_g) 50% 50%,
     var(--_g) 100% 50%;
   background-size: calc(100%/3) 50%;
   animation: l3 1s infinite linear;
 }
+
 @keyframes l3 {
-    20%{background-position:0%   0%, 50%  50%,100%  50%}
-    40%{background-position:0% 100%, 50%   0%,100%  50%}
-    60%{background-position:0%  50%, 50% 100%,100%   0%}
-    80%{background-position:0%  50%, 50%  50%,100% 100%}
+  20% {
+    background-position: 0% 0%, 50% 50%, 100% 50%
+  }
+
+  40% {
+    background-position: 0% 100%, 50% 0%, 100% 50%
+  }
+
+  60% {
+    background-position: 0% 50%, 50% 100%, 100% 0%
+  }
+
+  80% {
+    background-position: 0% 50%, 50% 50%, 100% 100%
+  }
+}
+
+
+.userTyping {
+  width: 35px;
+  aspect-ratio: 2;
+  --_g: no-repeat radial-gradient(circle closest-side, var(--dot-color) 90%, #0000);
+  background:
+    var(--_g) 0% 50%,
+    var(--_g) 50% 50%,
+    var(--_g) 100% 50%;
+  background-size: calc(100%/3) 50%;
+  animation: l3 1s infinite linear;
+}
+
+.userTyping {
+  --dot-color: #7a7a7a;
+}
+
+.dark .userTyping {
+  --dot-color: #d5d5d5;
+  /* Dark mode color */
 }

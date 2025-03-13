@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useEffect, useMemo, useRef, useState } from 'react'
 import { ProfileBar } from '../../components/UI/ProfileBar';
 import { MessageInputBox } from '../../components/UI/MessageInputBox';
 import { useMutation, useQuery } from '@tanstack/react-query';
@@ -11,8 +11,9 @@ export const ChatArea = ({ currentChatUser, setCurrentChatUser }) => {
     const [token, setToken] = useState(localStorage.getItem('token') || null)
     const [inputMessage, setInputMessage] = useState('')
     const { user } = authUser()
-    const { socket, onlineUsers ,typingStatus} = useSocketContext()
+    const { socket, onlineUsers, typingStatus } = useSocketContext()
     const debounceTyping = useDebounce(inputMessage, 1000)
+    const [groupedMessages, setGroupedMessages] = useState({});
 
     const chatEndRef = useRef()
 
@@ -26,6 +27,7 @@ export const ChatArea = ({ currentChatUser, setCurrentChatUser }) => {
     const [messages, setMessages] = useState([])
 
     useEffect(() => {
+        console.log('Current user changed', currentChatUser)
         if (currentChatUser) {
             setMessages([]); // Clear messages before loading new ones
             refetch()
@@ -70,6 +72,22 @@ export const ChatArea = ({ currentChatUser, setCurrentChatUser }) => {
         socket.emit("stopTyping", currentChatUser._id)
     }
 
+    useMemo(() => {
+        let finalMsg = {};
+        if (messages.length !== 0) {
+
+            messages.forEach(msg => {
+                const msgDate = new Date(msg.createdAt).toLocaleDateString('en-GB', { weekday: "long", year: "numeric", month: "long", day: "numeric" });
+                if (finalMsg[msgDate]) {
+                    finalMsg[msgDate].push(msg)
+                } else {
+                    finalMsg[msgDate] = [msg]
+                }
+            })
+            setGroupedMessages(finalMsg)
+        }
+    }, [messages])
+
     return (
         <>
             {/* Right Message Area  */}
@@ -94,26 +112,50 @@ export const ChatArea = ({ currentChatUser, setCurrentChatUser }) => {
                                             (
                                                 <p className='text-base font-semibold text-center dark:text-gray-100 text-gray-800'>No messages yet. Start a conversation<span className='text-orange-400'>!</span></p>
                                             )
-                                            :
-                                            (messages?.map((msg) => {
-                                                const msgTime = new Date(msg.createdAt).toLocaleTimeString('en-Us', { hour: '2-digit', minute: '2-digit', hour12: true })
-                                                return (
-                                                    <>
-                                                        <div key={msg?._id} >
-                                                            <div className={`flex gap-2 ${msg?.sender?._id === user?._id && "flex-row-reverse"}`}>
-                                                                <div className='w-8 h-8 ring-1 ring-orange-400 ring-offset-2 overflow-clip rounded-full'>
-                                                                    <img className='w-full h-full object-cover' src={msg?.sender?.avatar} alt="" />
-                                                                </div>
+                                            : (
+                                                Object.keys(groupedMessages).map((dateOfMsg) => {
+                                                    return <div>
+                                                        <p className='text-sm text-center text-gray-900 my-4 dark:text-gray-300 font-thin'>{dateOfMsg}</p>
+                                                        {
+                                                            groupedMessages[dateOfMsg].map((msg) => {
+                                                                const msgTime = new Date(msg.createdAt).toLocaleTimeString('en-Us', { hour: '2-digit', minute: '2-digit', hour12: true })
+                                                                return (
+                                                                    <>
+                                                                        <div key={msg?._id} >
+                                                                            <div className={`flex gap-2 ${msg?.sender?._id === user?._id && "flex-row-reverse"}`}>
+                                                                                <div className='w-8 h-8 ring-1 ring-orange-400 ring-offset-2 overflow-clip rounded-full'>
+                                                                                    <img className='w-full h-full object-cover' src={msg?.sender?.avatar} alt="" />
+                                                                                </div>
 
-                                                                < div className={`text-sm md:text-base px-3 py-2 break-words rounded-t-lg  ${msg?.sender?._id === user?._id ? "rounded-l-lg justify-self-end bg-orange-400 text-white" : "justify-self-start rounded-r-lg bg-gray-200 dark:bg-gray-500 dark:text-gray-100 text-gray-800"}  max-w-1/2 lg:w-fit`}>
-                                                                    <span >{msg?.message}</span>
-                                                                </div>
-                                                            </div>
-                                                            <p className={`text-xs leading-none mb-2 mt-0.5 font-mono dark:text-gray-100 tracking-tighter text-gray-500 ${msg?.sender._id === user?._id ? "text-right" : "text-left"}`}>{msgTime}</p>
-                                                        </div>
-                                                    </>
-                                                )
-                                            }))
+                                                                                < div className={`text-sm md:text-base px-3 py-2 break-words rounded-t-lg  ${msg?.sender?._id === user?._id ? "rounded-l-lg justify-self-end bg-orange-400 text-white" : "justify-self-start rounded-r-lg bg-gray-300 dark:bg-gray-500 dark:text-gray-200 text-gray-900"}  max-w-1/2 lg:w-fit`}>
+                                                                                    <span >{msg?.message}</span>
+                                                                                </div>
+                                                                            </div>
+                                                                            <p className={`text-xs leading-none mb-2 mt-0.5 font-mono dark:text-gray-100 tracking-tighter text-gray-500 ${msg?.sender._id === user?._id ? "text-right" : "text-left"}`}>{msgTime}</p>
+                                                                        </div>
+                                                                    </>
+                                                                )
+                                                            })
+                                                        }
+                                                    </div>
+                                                })
+                                            )
+
+                                    }
+                                    {
+                                        typingStatus.includes(currentChatUser._id) &&
+
+                                        <div className={`flex gap-2 transition-all ease-in-out duration-300 `}>
+                                            <div className='w-8 h-8 ring-1 ring-orange-400 ring-offset-2 overflow-clip rounded-full'>
+                                                <img className='w-full h-full object-cover' src={currentChatUser?.avatar} alt="" />
+                                            </div>
+                                            < div className={`px-3 py-2.5 rounded-t-lg justify-self-start rounded-r-lg bg-gray-300 dark:bg-gray-500 dark:text-gray-100 max-w-1/2 lg:w-fit`}>
+                                                <span >
+                                                    <div className='userTyping'></div>
+                                                </span>
+                                            </div>
+                                        </div>
+
                                     }
                                     <div ref={chatEndRef} />
                                 </div>
@@ -132,3 +174,25 @@ export const ChatArea = ({ currentChatUser, setCurrentChatUser }) => {
         </>
     )
 }
+
+// (messages?.map((msg) => {
+//     const msgTime = new Date(msg.createdAt).toLocaleTimeString('en-Us', { hour: '2-digit', minute: '2-digit', hour12: true })
+// const msgDate = new Date(msg.createdAt).toLocaleDateString('en-Us')
+
+//     return (
+//         <>
+//             <div key={msg?._id} >
+//                 <div className={`flex gap-2 ${msg?.sender?._id === user?._id && "flex-row-reverse"}`}>
+//                     <div className='w-8 h-8 ring-1 ring-orange-400 ring-offset-2 overflow-clip rounded-full'>
+//                         <img className='w-full h-full object-cover' src={msg?.sender?.avatar} alt="" />
+//                     </div>
+
+//                     < div className={`text-sm md:text-base px-3 py-2 break-words rounded-t-lg  ${msg?.sender?._id === user?._id ? "rounded-l-lg justify-self-end bg-orange-400 text-white" : "justify-self-start rounded-r-lg bg-gray-300 dark:bg-gray-500 dark:text-gray-200 text-gray-900"}  max-w-1/2 lg:w-fit`}>
+//                         <span >{msg?.message}</span>
+//                     </div>
+//                 </div>
+//                 <p className={`text-xs leading-none mb-2 mt-0.5 font-mono dark:text-gray-100 tracking-tighter text-gray-500 ${msg?.sender._id === user?._id ? "text-right" : "text-left"}`}>{msgDate} {msgTime}</p>
+//             </div>
+//         </>
+//     )
+// }))

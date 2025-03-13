@@ -98,8 +98,8 @@ export const FriendRequest = () => {
   return (
     <div className='bg-white h-full w-full dark:bg-gray-900 p-8'>
       <div className='relative w-full'>
-        <div className="serarch flex h-12  overflow-hidden rounded-lg items-center">
-          <input type="text" className='w-full h-full px-4 py-3 border-none outline-none dark:bg-gray-600 dark:text-gray-100 bg-gray-100' value={search} onChange={(e) => setSearch(e.target.value)} placeholder='Find a Friend....' />
+        <div className="serarch flex h-12 outline-3 outline-orange-400  overflow-hidden rounded-lg items-center">
+          <input type="text" className='w-full h-full px-4 py-3 outline-none border-none dark:bg-gray-600 dark:text-gray-100 bg-gray-100' value={search} onChange={(e) => setSearch(e.target.value)} placeholder='Find a Friend....' />
           <button className=' px-5 py-1 h-full text-white font-semibold bg-orange-400'>Search</button>
         </div>
         {
@@ -118,7 +118,6 @@ export const FriendRequest = () => {
                   :
                   (
                     searchedUsers?.map(searchUser => {
-                      console.log(searchUser)
                       return <ProfileBars key={searchUser._id} id={searchUser._id} sendFriendRequestMutation={sendFriendRequestMutation} name={searchUser?.fullName} avatar={searchUser?.avatar} card="SendRequest" />
                     })
                   )
@@ -173,11 +172,11 @@ export const FriendRequest = () => {
                 </div>
               ) : (
                 outgoingRequests?.map((request) => (
-                  <ProfileBars
+                  < ProfileBars
                     key={request._id}
                     id={request._id}
-                    name={request.from.fullName}
-                    avatar={request.from.avatar}
+                    name={request.to.fullName}
+                    avatar={request.to.avatar}
                     card="Outgoing"
                   />
                 ))

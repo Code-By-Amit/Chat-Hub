@@ -4,6 +4,7 @@ import { ChatUserCard } from '../../components/UI/ChatUserCard';
 import { useQuery } from '@tanstack/react-query';
 import { fetchUserFriends } from '../../apis/user';
 import { useSocketContext } from '../../context/useSocketContext';
+import { Link } from 'react-router-dom';
 
 export const FriendListPannel = ({ setCurrentChatUser }) => {
     const [active, setActive] = useState('Personals')
@@ -19,13 +20,13 @@ export const FriendListPannel = ({ setCurrentChatUser }) => {
 
     return (
         <>
-            <div className='flex-1 md:max-w-96 my-2 ml-2 bg-white dark:bg-gray-800 rounded'>
-                <div className='p-4'>
+            <div className='flex-1 md:max-w-96 my-2 ml-2 bg-white relative dark:bg-gray-800 rounded'>
+                <div className='p-4 '>
                     <h1 className='text-3xl mt-5 font-bold dark:text-white'>Chats</h1>
                     <SlidingButton setActive={setActive} active={active} buttons={["Personals", "Groups"]} />
                     <div className='w-full border border-gray-200 my-4'></div>
 
-                    <div className="profileCard flex flex-col gap-2 p-2 max-h-100 md:max-h-144 overflow-y-auto custom-scrollbar ">
+                    <div className="profileCard flex  flex-col gap-2 p-2 max-h-100 md:max-h-144 overflow-y-auto custom-scrollbar ">
                         {/* <ChatUserCard avatar="https://avatar.iran.liara.run/public/boy?username=amit" name="Amit Saini" isOnline /> */}
                         {
                             active === "Personals" ?
@@ -37,12 +38,18 @@ export const FriendListPannel = ({ setCurrentChatUser }) => {
                                         <ChatUserSkeleton />
                                         <ChatUserSkeleton />
                                     </>
-                                    :
+                                    : data?.friends?.length === 0 ? (
+                                        <div className='w-full'>
+                                            <Link to="friendrequest" className='w-full inline-block text-center font-semibold cursor-pointer text-white bg-orange-400 rounded py-2'>New Chat</Link>
+                                        </div>
+                                    ) :
+                                    (
                                     data?.friends?.map((friend, i) => {
                                         const isOnline = onlineUsers?.includes(friend?._id)
                                         const isTyping = typingStatus.includes(friend?._id)
                                         return <ChatUserCard key={i} setCurrentChatUser={setCurrentChatUser} friend={friend} isOnline={isOnline} isTyping={isTyping} />
                                     }))
+                                )
                                 : active === "Groups" ?
                                     (
                                         <div className='w-full h-full flex justify-center items-center'>

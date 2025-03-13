@@ -15,4 +15,6 @@ export const logoutApi = () => api.post("/auth/logout").then(res => res.data)
 
 export const fetchUserFriends = (token) => api.get("/user/friends", { headers: { Authorization: `Bearer ${token}` } }).then(res => res.data)
 
-export const searchUserApi = (search,token) => api.get(`/user?search=${search}`, { headers: { Authorization: `Bearer ${token}` } }).then(res => res.data)
+export const searchUserApi = (search, token) => api.get(`/user?search=${search}`, { headers: { Authorization: `Bearer ${token}` } }).then(res => res.data)
+
+export const editUserProfileApi = (data, token) => api.patch(`/user/update`, data, { headers: { Authorization: `Bearer ${token}` } }).then(res => res.data)

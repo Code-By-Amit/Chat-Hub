@@ -96,7 +96,7 @@ async function incommingRequests(req, res) {
 async function outgoingRequests(req, res) {
     try {
         const userId = req.userId;
-        const friendRequest = await FriendRequest.find({ from: userId }).populate('to', 'profilePicture fullName username')
+        const friendRequest = await FriendRequest.find({ from: userId }).populate('to', 'avatar fullName username')
         if(friendRequest.length === 0) return res.status(200).json({message:"No Outgoing Friend Request"})
         res.status(200).json(friendRequest)
     } catch (error) {
