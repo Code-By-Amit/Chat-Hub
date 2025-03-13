@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { FaUser } from "react-icons/fa";
 import { MdOutlinePassword } from "react-icons/md";
@@ -9,9 +9,16 @@ export const Login = () => {
     const [isPassVisible, setIsPassVisible] = useState(false)
     const [credentials, setCredentials] = useState({ username: "", password: "" });
     const [errors, setErrors] = useState([]);
+    const token = localStorage.getItem('token')
 
     const { loginMutation } = authUser()
     const navigate = useNavigate()
+
+    useEffect(() => {
+        if (token) {
+            navigate('/chat')
+        }
+    }, [token, navigate])
 
     const validate = () => {
         let newErrors = [];

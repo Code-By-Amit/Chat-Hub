@@ -38,7 +38,7 @@ export const MessageInputBox = ({ handleSendMessage, inputMessage, setInputMessa
             socket.emit("stopTyping", payload); // Emit stop typing event
         }, 2000);
     };
-    
+
     const handleEmojiClick = (e) => {
         setInputMessage(prev => prev + e.emoji)
     }
@@ -51,7 +51,7 @@ export const MessageInputBox = ({ handleSendMessage, inputMessage, setInputMessa
                 </div>
                 <div className='flex-1 flex items-center px-4 h-full  dark:bg-gray-500 dark:text-gray-100 bg-white rounded-lg outline-orange-300'>
                     <FaRegSmileWink onClick={() => setIsEmojieOpen(!isEmojiOpen)} size={50} className='dark:bg-gray-50/20 bg-gray-500/20 text-gray-600 dark:text-gray-200 cursor-pointer hover:text-gray-500 dark:hover:text-gray-300 rounded-full p-1.5' />
-                    <input type="text" className='h-full w-full py-2 px-3 outline-none' value={inputMessage}
+                    <input type="text" className='h-full w-full text-lg py-2 px-3 outline-none' value={inputMessage}
                         onChange={handleTyping}
                         onKeyDown={(e) => {
                             if (e.key === 'Enter') {
