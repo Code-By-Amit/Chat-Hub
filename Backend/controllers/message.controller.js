@@ -1,6 +1,7 @@
 const Chat = require("../models/chat.model");
 const Message = require('../models/message.model')
-const { io, getReciverSocketId } = require("../Socket")
+const { io, getReciverSocketId } = require("../Socket");
+const { uploadOnCloudinary } = require("../utils/uploadOnCloudinary");
 
 async function sendMessage(req, res) {
     try {
@@ -19,10 +20,18 @@ async function sendMessage(req, res) {
                 members: { $in: [reciverId, userId] }
             })
         }
+
+        let image;
+        if (req.file) {
+            const response = await uploadOnCloudinary(req.file.path);
+            image = response.secure_url
+        }
+
         const newMessage = await Message.create({
             chatId: chat._id,
             message,
-            sender: userId
+            sender: userId,
+            image
         })
 
         await newMessage.populate('sender');

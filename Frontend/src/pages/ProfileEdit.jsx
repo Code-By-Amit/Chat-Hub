@@ -116,7 +116,7 @@ export const ProfileEdit = () => {
                 </div>
             <div className=''>
                 <h1 className='text-2xl text-gray-800 font-semibold dark:text-gray-50 text-center mb-3'>Edit Profile</h1>
-                <div className='bg-white p-5 flex dark:bg-gray-700 '>
+                <div className='bg-white p-5 flex flex-col items-center md:flex-row dark:bg-gray-700 '>
                     <div className='m-4 w-40 flex justify-start items-center flex-col'>
                         <img className='h-25 w-25 rounded-full mb-2 shadow-2xl' src={previewAvatar ? previewAvatar : avatar} alt="Profile" />
                         {previewAvatar ? <button onClick={handleCanceleUpload} className="cursor-pointer bg-slate-200 font-semibold px-4 py-2 my-4 rounded-lg w-full text-center" > Cancel </button>
@@ -124,7 +124,7 @@ export const ProfileEdit = () => {
                         <input id='file-upload' type="file" className="hidden" name="avatar" onChange={handleFileChange} />
                     </div>
 
-                    <div className='w-96'>
+                    <div className=' w-[80vw] md:w-96'>
                         <form onSubmit={handleFormSubmit} >
                             <div className='mb-2 flex justify-center gap-2 rounded px-3 py-2 items-center bg-gray-100'>
                                 <CiEdit />

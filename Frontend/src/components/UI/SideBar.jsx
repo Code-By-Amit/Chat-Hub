@@ -23,15 +23,15 @@ export const SideBar = () => {
         console.log(isDarkMode)
     }, [isDarkMode]);
 
-    const [screenWidth, setScreenWidth] = useState(0);
+    const [screenWidth, setScreenWidth] = useState(window.innerWidth);
 
-    useEffect(() => {
-        const handleResize = () => {
-            setScreenWidth(window.innerWidth)
-        }
-        window.addEventListener("resize", handleResize);
-        return () => window.removeEventListener("resize", handleResize);
-    }, [])
+    // useEffect(() => {
+    //     const handleResize = () => {
+    //         setScreenWidth(window.innerWidth)
+    //     }
+    //     window.addEventListener("resize", handleResize);
+    //     return () => window.removeEventListener("resize", handleResize);
+    // }, [])
 
     return (
         <>
@@ -53,7 +53,7 @@ export const SideBar = () => {
                         <FiMoon className={`absolute transition-all duration-300 ease-in-out
                                            ${isDarkMode ? "opacity-100 rotate-0 scale-100" : "opacity-0 rotate-180 scale-75"}`} size={24} />
                     </div>
-                    <Tooltip id="theme" className="z-50" place={screenWidth < 1150 ? "right" : "top"}>Light/Dark Mode</Tooltip>
+                    <Tooltip id="theme" className="z-50" place="right">Light/Dark Mode</Tooltip>
 
                     <button
                         onClick={() => setShowLogoutModal(true)}
@@ -61,7 +61,7 @@ export const SideBar = () => {
                         data-tooltip-id="logout"
                     >
                         <FiLogOut size={24} />
-                        <Tooltip id="logout" className="z-50" place={screenWidth < 1150 ? "right" : "top"}>Logout</Tooltip>
+                        <Tooltip id="logout" className="z-50" place="right" >Logout</Tooltip>
                     </button>
                 </nav>
             </div>
@@ -80,7 +80,7 @@ const NavigationLink = ({ icon, to, tooltip, end, screenWidth }) => {
             data-tooltip-id={tooltip}
         >
             {icon}
-            <Tooltip id={tooltip} className="z-50 " place={screenWidth < 1150 ? "right" : "top"}>{tooltip}</Tooltip>
+            <Tooltip id={tooltip} className="z-50 " place="right">{tooltip}</Tooltip>
         </NavLink>
     );
 };

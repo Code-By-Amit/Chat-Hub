@@ -8,10 +8,10 @@ import { authUser } from '../../context/authUser';
 
 export const ChatArea = ({ currentChatUser, setCurrentChatUser }) => {
     const [token, setToken] = useState(localStorage.getItem('token') || null)
-    const [inputMessage, setInputMessage] = useState('')
     const { user } = authUser()
     const { socket, onlineUsers, typingStatus } = useSocketContext()
     const [groupedMessages, setGroupedMessages] = useState({});
+
 
     const chatEndRef = useRef()
 
@@ -31,11 +31,13 @@ export const ChatArea = ({ currentChatUser, setCurrentChatUser }) => {
         }
     }, [currentChatUser])
 
+
     useEffect(() => {
         if (conversationData?.messages) {
             setMessages(conversationData.messages);
         }
     }, [conversationData]);
+    
 
     useEffect(() => {
         if (!socket) return
@@ -53,21 +55,11 @@ export const ChatArea = ({ currentChatUser, setCurrentChatUser }) => {
         }
     }, [socket])
 
+
     useEffect(() => {
         chatEndRef?.current?.scrollIntoView({ behavior: "smooth" });
     }, [messages])
 
-
-    const sendMessageMutation = useMutation({
-        mutationKey: ['sendMessage'],
-        mutationFn: ({ reciverId, message }) => sendMessageApi(reciverId, message, token)
-    })
-
-    const handleSendMessage = (message) => {
-        if (message.trim() === "") return
-        sendMessageMutation.mutate({ reciverId: currentChatUser._id, message })
-        socket.emit("stopTyping", currentChatUser._id)
-    }
 
     useMemo(() => {
         let finalMsg = {};
@@ -89,7 +81,7 @@ export const ChatArea = ({ currentChatUser, setCurrentChatUser }) => {
         <>
             {/* Right Message Area  */}
             {/* <div className={`md:m-2 ${currentChatUser ? "right-0" : "-right-full"} max-w-dvh absolute overflow-clip md:static max-h-dvh z-10 flex dark:bg-gray-700 flex-col bg-white box-border flex-1 rounded`}> */}
-            <div className={` md:m-2  max-w-full  absolute md:static  max-h-full  z-10  flex  dark:bg-gray-700  flex-col  bg-white  box-border  flex-1  rounded w-full h-full md:w-auto md:h-auto  transition-all duration-500 ease-in-out ${currentChatUser ? "right-0" : "right-full"}`}>
+            <div className={` md:m-2  max-w-full  absolute md:static h-screen max-h-dvh  z-10  flex  dark:bg-gray-700  flex-col  bg-white  box-border  flex-1  rounded w-full h-full md:w-auto md:h-auto  transition-all duration-500 ease-in-out ${currentChatUser ? "right-0" : "right-full"}`}>
 
 
                 {
@@ -124,7 +116,8 @@ export const ChatArea = ({ currentChatUser, setCurrentChatUser }) => {
                                                                                     <img className='w-full h-full object-cover' src={msg?.sender?.avatar} alt="" />
                                                                                 </div>
 
-                                                                                < div className={`text-sm md:text-base px-3 py-2 break-words rounded-t-lg  ${msg?.sender?._id === user?._id ? "rounded-l-lg justify-self-end bg-orange-400 text-white" : "justify-self-start rounded-r-lg bg-gray-300 dark:bg-gray-500 dark:text-gray-200 text-gray-900"}  max-w-1/2 lg:w-fit`}>
+                                                                                <div className={`text-sm md:text-base px-3 py-2 break-words rounded-t-lg  ${msg?.sender?._id === user?._id ? "rounded-l-lg justify-self-end bg-orange-400 text-white" : "justify-self-start rounded-r-lg bg-gray-300 dark:bg-gray-500 dark:text-gray-200 text-gray-900"}  max-w-1/2 lg:w-fit`}>
+                                                                                    <img src={msg?.image} />
                                                                                     <span >{msg?.message}</span>
                                                                                 </div>
                                                                             </div>
@@ -158,7 +151,7 @@ export const ChatArea = ({ currentChatUser, setCurrentChatUser }) => {
                                 </div>
                             </div>
 
-                            <MessageInputBox handleSendMessage={handleSendMessage} inputMessage={inputMessage} setInputMessage={setInputMessage} sendMessageMutation={sendMessageMutation} currentChatUser={currentChatUser} />
+                            <MessageInputBox currentChatUser={currentChatUser} setMessages={setMessages} />
                         </>
                         :
                         <div className=' hidden w-full h-full md:flex flex-col gap-3 justify-center items-center'>

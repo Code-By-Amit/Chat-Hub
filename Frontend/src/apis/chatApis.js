@@ -5,7 +5,7 @@ const api = axios.create({
     withCredentials: true
 })
 
-export const sendMessageApi = (reciverId, message, token) => api.post('/message/send', { reciverId, message }, { headers: { Authorization: `Bearer ${token}` } }).then(res => res.data)
+export const sendMessageApi = (formdata, token) => api.post('/message/send', formdata, { headers: { Authorization: `Bearer ${token}` } }).then(res => res.data)
 
 export const getMessagesApi = (toUserId, token) => api.get(`/message/getmessage/${toUserId}`, { headers: { Authorization: `Bearer ${token}` } }).then(res => res.data)
 
