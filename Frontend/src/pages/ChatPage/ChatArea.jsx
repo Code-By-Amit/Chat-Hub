@@ -37,12 +37,13 @@ export const ChatArea = ({ currentChatUser, setCurrentChatUser }) => {
             setMessages(conversationData.messages);
         }
     }, [conversationData]);
-    
+
 
     useEffect(() => {
         if (!socket) return
         const handleNewMessage = (newMessage) => {
             setMessages(prevMsg => ([...prevMsg, {
+                image: newMessage.image,
                 sender: newMessage.sender,
                 message: newMessage.message,
                 createdAt: newMessage.createdAt
@@ -81,8 +82,7 @@ export const ChatArea = ({ currentChatUser, setCurrentChatUser }) => {
         <>
             {/* Right Message Area  */}
             {/* <div className={`md:m-2 ${currentChatUser ? "right-0" : "-right-full"} max-w-dvh absolute overflow-clip md:static max-h-dvh z-10 flex dark:bg-gray-700 flex-col bg-white box-border flex-1 rounded`}> */}
-            <div className={` md:m-2  max-w-full  absolute md:static h-screen max-h-dvh  z-10  flex  dark:bg-gray-700  flex-col  bg-white  box-border  flex-1  rounded w-full h-full md:w-auto md:h-auto  transition-all duration-500 ease-in-out ${currentChatUser ? "right-0" : "right-full"}`}>
-
+            <div className={` md:m-2 max-w-full  absolute md:static min-h-lvh z-10  flex  dark:bg-gray-700  flex-col  bg-white  box-border  flex-1  rounded w-full md:w-auto md:min-h-[98vh]  transition-all duration-500 ease-in-out ${currentChatUser ? "right-0" : "right-full"}`}>
 
                 {
                     currentChatUser ?
@@ -90,20 +90,19 @@ export const ChatArea = ({ currentChatUser, setCurrentChatUser }) => {
                             <ProfileBar setCurrentChatUser={setCurrentChatUser} avatar={currentChatUser.avatar} name={currentChatUser.fullName} isOnline={onlineUsers?.includes(currentChatUser?._id)} isTyping={typingStatus.includes(currentChatUser._id)} />
 
                             {/* Message Area */}
-                            <div className='w-full flex-1 overflow-auto custom-scrollbar'>
-                                <div className='w-full h-full py-4 px-7 flex flex-col gap-1 justify-end '>
+                            <div className='w-full flex-1 overflow-y-auto custom-scrollbar'>
+                                <div className='w-full py-4 px-7 overflow-y-auto flex flex-col gap-1 justify-end '>
                                     {isLoadingMessage ?
                                         (<div className='w-full h-full flex justify-center items-center'>
                                             <div className="loader"></div>
                                         </div>) :
                                         messages?.length === 0 ?
-
                                             (
                                                 <p className='text-base font-semibold text-center dark:text-gray-100 text-gray-800'>No messages yet. Start a conversation<span className='text-orange-400'>!</span></p>
                                             )
                                             : (
                                                 Object.keys(groupedMessages).map((dateOfMsg) => {
-                                                    return <div>
+                                                    return <div className='space-y-4'>
                                                         <p className='text-sm text-center text-gray-900 my-4 dark:text-gray-300 font-thin'>{dateOfMsg}</p>
                                                         {
                                                             groupedMessages[dateOfMsg].map((msg) => {
@@ -115,10 +114,10 @@ export const ChatArea = ({ currentChatUser, setCurrentChatUser }) => {
                                                                                 <div className='w-8 h-8 ring-1 ring-orange-400 ring-offset-2 overflow-clip rounded-full'>
                                                                                     <img className='w-full h-full object-cover' src={msg?.sender?.avatar} alt="" />
                                                                                 </div>
-
-                                                                                <div className={`text-sm md:text-base px-3 py-2 break-words rounded-t-lg  ${msg?.sender?._id === user?._id ? "rounded-l-lg justify-self-end bg-orange-400 text-white" : "justify-self-start rounded-r-lg bg-gray-300 dark:bg-gray-500 dark:text-gray-200 text-gray-900"}  max-w-1/2 lg:w-fit`}>
-                                                                                    <img src={msg?.image} />
-                                                                                    <span >{msg?.message}</span>
+                                                                                
+                                                                                <div className={`text-sm md:text-base px-3 py-2 break-words rounded-t-lg  ${msg?.sender?._id === user?._id ? "rounded-l-lg justify-self-end bg-orange-400 text-white" : "justify-self-start rounded-r-lg bg-gray-300 dark:bg-gray-500 dark:text-gray-200 text-gray-900"} max-w-8/12 md:max-w-1/3 `}>
+                                                                                    {msg?.image && <img src={msg?.image} className=' w-auto h-auto md:h-35' alt='image' />}
+                                                                                    <p>{msg?.message}</p>
                                                                                 </div>
                                                                             </div>
                                                                             <p className={`text-xs leading-none mb-2 mt-0.5 font-mono dark:text-gray-100 tracking-tighter text-gray-500 ${msg?.sender._id === user?._id ? "text-right" : "text-left"}`}>{msgTime}</p>

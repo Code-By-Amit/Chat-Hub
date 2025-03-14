@@ -36,8 +36,6 @@ async function sendMessage(req, res) {
 
         await newMessage.populate('sender');
 
-        console.log(chat.members)
-
         const memberSocketIds = await Promise.all(
             chat.members.map(member => getReciverSocketId(member)) // Then map and resolve promises
         );

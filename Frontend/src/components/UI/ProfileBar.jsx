@@ -4,7 +4,7 @@ import { MdOutlineKeyboardArrowLeft } from "react-icons/md";
 export const ProfileBar = ({ avatar, name, isOnline, setCurrentChatUser, isTyping }) => {
 
     return (
-        <div className="card flex gap-4 p-3 pt-5 top-0 dark:text-gray-100 dark:bg-gray-800 border-gray-300 border-b w-full h-fit rounded bg-gray-50">
+        <div className="card flex gap-4 p-3 pt-5 top-0 sticky dark:text-gray-100 dark:bg-gray-800 border-gray-300 border-b w-full h-fit rounded bg-gray-50">
             <div className='flex items-center gap-2'>
                 <MdOutlineKeyboardArrowLeft onClick={() => { setCurrentChatUser() }} size={34} className='hover:bg-gray-300 dark:text-gray-100 text-gray-600 cursor-pointer rounded-full' />
                 <div className='w-10 h-10 ring-2 overflow-clip rounded-full ring-orange-400 ring-offset-2'>

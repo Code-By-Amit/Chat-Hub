@@ -23,24 +23,15 @@ export const SideBar = () => {
         console.log(isDarkMode)
     }, [isDarkMode]);
 
-    const [screenWidth, setScreenWidth] = useState(window.innerWidth);
-
-    // useEffect(() => {
-    //     const handleResize = () => {
-    //         setScreenWidth(window.innerWidth)
-    //     }
-    //     window.addEventListener("resize", handleResize);
-    //     return () => window.removeEventListener("resize", handleResize);
-    // }, [])
 
     return (
         <>
             <div className="md:w-19 md:h-screen flex flex-col items-center md:p-4 shadow-lg relative dark:bg-gray-800">
 
                 <nav className="flex md:flex-col justify-evenly w-full md:gap-6  my-3 md:mt-6">
-                    <NavigationLink icon={<IoChatboxEllipsesOutline size={24} />} to="/chat" tooltip="Chat" end screenWidth={screenWidth} />
-                    <NavigationLink icon={<PiUserListBold size={24} />} to="/chat/friendrequest" tooltip="Friend Requests" screenWidth={screenWidth} />
-                    <NavigationLink icon={<FaUser size={24} />} to="/chat/profile" tooltip="Profile" screenWidth={screenWidth} />
+                    <NavigationLink icon={<IoChatboxEllipsesOutline size={24} />} to="/chat" tooltip="Chat" end  />
+                    <NavigationLink icon={<PiUserListBold size={24} />} to="/chat/friendrequest" tooltip="Friend Requests"  />
+                    <NavigationLink icon={<FaUser size={24} />} to="/chat/profile" tooltip="Profile"  />
 
                     {/* Light/Dark Toggle  */}
                     <div className="relative flex justify-center items-center w-12 h-12 rounded-lg 
@@ -70,17 +61,17 @@ export const SideBar = () => {
     );
 };
 
-const NavigationLink = ({ icon, to, tooltip, end, screenWidth }) => {
+const NavigationLink = ({ icon, to, tooltip, end }) => {
 
     return (
         <NavLink
             end={end}
             to={to}
-            className={({ isActive }) => `flex md:static justify-center items-center w-12 h-12 rounded-lg transition-all ${isActive ? "bg-orange-400 text-white" : "text-gray-500 dark:text-gray-300 dark:hover:bg-gray-600 hover:bg-gray-100"}`}
+            className={({ isActive }) => `relative flex md:static justify-center items-center w-12 h-12 rounded-lg transition-all ${isActive ? "bg-orange-400 text-white" : "text-gray-500 dark:text-gray-300 dark:hover:bg-gray-600 hover:bg-gray-100"}`}
             data-tooltip-id={tooltip}
         >
             {icon}
-            <Tooltip id={tooltip} className="z-50 " place="right">{tooltip}</Tooltip>
+            <Tooltip id={tooltip}  className="z-50" place="right">{tooltip}</Tooltip>
         </NavLink>
     );
 };

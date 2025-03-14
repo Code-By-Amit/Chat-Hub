@@ -20,7 +20,7 @@ export const FriendListPannel = ({ setCurrentChatUser }) => {
 
     return (
         <>
-            <div className='flex-1 md:max-w-96 my-2 ml-2 bg-white relative dark:bg-gray-800 rounded'>
+            <div className='ml-2 my-2 flex-1 md:max-w-96 bg-white relative dark:bg-gray-800 rounded'>
                 <div className='p-4 '>
                     <h1 className='text-3xl mt-5 font-bold dark:text-white'>Chats</h1>
                     <SlidingButton setActive={setActive} active={active} buttons={["Personals", "Groups"]} />

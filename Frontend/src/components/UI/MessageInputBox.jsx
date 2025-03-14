@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import { LuSend } from 'react-icons/lu'
 import { useSocketContext } from '../../context/useSocketContext';
 import { authUser } from '../../context/authUser';
@@ -10,7 +10,7 @@ import { useMutation } from '@tanstack/react-query';
 import { sendMessageApi } from '../../apis/chatApis';
 
 
-export const MessageInputBox = ({ currentChatUser,setMessages }) => {
+export const MessageInputBox = ({ currentChatUser, setMessages }) => {
     const [token, setToken] = useState(localStorage.getItem('token') || null)
     const { socket } = useSocketContext()
     const [isTyping, setIsTyping] = useState(false);
@@ -70,7 +70,7 @@ export const MessageInputBox = ({ currentChatUser,setMessages }) => {
         typingTimeoutRef.current = setTimeout(() => {
             setIsTyping(false);
             socket.emit("stopTyping", payload); // Emit stop typing event
-        }, 2000);
+        }, 1500);
     };
 
     const handleEmojiClick = (e) => {
@@ -98,6 +98,16 @@ export const MessageInputBox = ({ currentChatUser,setMessages }) => {
             setInputImage(null)
         }
     }
+
+    const [loadingDots, setLoadingDots] = useState('.')
+    useEffect(() => {
+        
+        let a = setInterval(() => {
+            setLoadingDots((prev) => prev.length >= 3 ? '.' : prev + ".")
+        }, 500);
+
+        return () => clearInterval(a)
+    }, [])
 
     return (
         <div className='relative bottom-0 left-0 w-full border-gray-300 border-t dark:bg-gray-800 bg-gray-100  p-2'>
@@ -140,7 +150,7 @@ export const MessageInputBox = ({ currentChatUser,setMessages }) => {
                 <div className='bg-orange-400 cursor-pointer text-white px-6 mx-2 rounded flex items-center justify-center h-full gap-2'>
                     <p onClick={() => {
                         handleSendMessage(inputMessage)
-                    }} className='text-sm font-medium leading-none'>{sendMessageMutation.isPending ? "Sending..." : "Send"}</p>
+                    }} className='text-sm font-medium leading-none'>{sendMessageMutation.isPending ? Sending+loadingDots : "Send" }</p>
                     {/* <IoSend size={23} /> */}
                     <LuSend />
                 </div>
