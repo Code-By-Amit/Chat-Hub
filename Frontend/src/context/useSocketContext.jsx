@@ -38,12 +38,10 @@ export const SocketContextProvider = ({ children }) => {
     useEffect(() => {
         if (!socket) return
         const handleTypingStatus = (whosTyping) => {
-            console.log(whosTyping)
             setTypingStatus(prev => ([...prev, whosTyping]))
         }
 
         const handleStopTypingStatus = (whoStopTyping) => {
-            console.log("WhosStopTyping: ", whoStopTyping)
             setTypingStatus((prevTypingUser) => prevTypingUser.filter((userId) => userId !== whoStopTyping))
         }
 
