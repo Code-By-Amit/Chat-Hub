@@ -101,7 +101,7 @@ export const MessageInputBox = ({ currentChatUser, setMessages }) => {
 
     const [loadingDots, setLoadingDots] = useState('.')
     useEffect(() => {
-        
+
         let a = setInterval(() => {
             setLoadingDots((prev) => prev.length >= 3 ? '.' : prev + ".")
         }, 500);
@@ -150,7 +150,7 @@ export const MessageInputBox = ({ currentChatUser, setMessages }) => {
                 <div className='bg-orange-400 cursor-pointer text-white px-6 mx-2 rounded flex items-center justify-center h-full gap-2'>
                     <p onClick={() => {
                         handleSendMessage(inputMessage)
-                    }} className='text-sm font-medium leading-none'>{sendMessageMutation.isPending ? Sending+loadingDots : "Send" }</p>
+                    }} className='text-sm font-medium leading-none'>{sendMessageMutation.isPending ? "Sending" + loadingDots : "Send"}</p>
                     {/* <IoSend size={23} /> */}
                     <LuSend />
                 </div>
