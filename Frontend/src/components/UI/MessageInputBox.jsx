@@ -147,7 +147,7 @@ export const MessageInputBox = ({ currentChatUser, setMessages }) => {
                         }}
                         placeholder='Type a message...' />
                 </div>
-                <div className='bg-orange-400 cursor-pointer text-white px-6 mx-2 rounded flex items-center justify-center h-full gap-2'>
+                <div className='bg-orange-400 cursor-pointer text-white px-4 md:px-6 mx-2 rounded flex items-center justify-center h-full gap-2'>
                     <p onClick={() => {
                         handleSendMessage(inputMessage)
                     }} className='text-sm font-medium leading-none'>{sendMessageMutation.isPending ? "Sending" + loadingDots : "Send"}</p>

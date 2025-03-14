@@ -51,7 +51,7 @@
 
 
 .userTyping {
-  width: 35px;
+  width: 1.4rem;
   aspect-ratio: 2;
   --_g: no-repeat radial-gradient(circle closest-side, var(--dot-color) 90%, #0000);
   background:
