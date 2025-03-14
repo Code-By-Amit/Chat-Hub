@@ -110,10 +110,10 @@ export const MessageInputBox = ({ currentChatUser, setMessages }) => {
     }, [])
 
     return (
-        <div className='relative bottom-0 left-0 w-full border-gray-300 border-t dark:bg-gray-800 bg-gray-100  p-2'>
+        <div className='sticky bottom-0 left-0 w-full border-gray-300 border-t dark:bg-gray-800 bg-gray-100  p-2'>
             <div className='w-full h-15 flex items-center  p-2 rounded-lg'>
                 <div className={`absolute bottom-20 transition ease-in-out duration-300 left-5 ${isEmojiOpen ? "block" : "hidden"}`}>
-                    <EmojiPicker open={true} lazyLoadEmojis={true} emojiStyle='apple' className='z-50' onEmojiClick={handleEmojiClick} width={460} height={400} />
+                    <EmojiPicker open={true} lazyLoadEmojis={true} emojiStyle='apple' className='z-50' onEmojiClick={handleEmojiClick} height={400} />
                 </div>
 
                 <div className='flex-1 flex items-center px-2 h-full  dark:bg-gray-500 dark:text-gray-100 bg-white rounded-lg outline-orange-300'>
