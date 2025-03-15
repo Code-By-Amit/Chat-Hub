@@ -59,7 +59,7 @@ export const ChatArea = ({ currentChatUser, setCurrentChatUser }) => {
 
     useEffect(() => {
         chatEndRef?.current?.scrollIntoView({ behavior: "smooth" });
-    }, [messages])
+    }, [messages,currentChatUser])
 
 
     useMemo(() => {

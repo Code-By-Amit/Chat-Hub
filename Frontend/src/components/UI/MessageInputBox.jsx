@@ -34,7 +34,11 @@ export const MessageInputBox = ({ currentChatUser, setMessages }) => {
 
     const handleSendMessage = (message) => {
         if (message.trim() === "") return
-        socket.emit("stopTyping", currentChatUser._id)
+        const payload = {
+            to: currentChatUser?._id,
+            from: user?._id
+        }
+        socket.emit("stopTyping", payload)
 
         const messageFormData = new FormData()
 
