@@ -17,7 +17,7 @@ async function sendMessage(req, res) {
         } else {
             chat = await Chat.findOne({
                 isGroupChat: false,
-                members: { $in: [reciverId, userId] }
+                members: { $all: [reciverId, userId] }
             })
         }
 
