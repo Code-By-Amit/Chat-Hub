@@ -26,7 +26,15 @@ const userSchama = new mongoose.Schema({
     friends: [{
         type: mongoose.Schema.Types.ObjectId,
         ref: "User"
-    }]  
+    }],
+    groups: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Chat"
+    }],
+    publicKey: {
+        type: String
+    },
+    encryptedPrivateKey: { type: String }
 }, { timestamps: true })
 
 userSchama.pre('save', async function (next) {

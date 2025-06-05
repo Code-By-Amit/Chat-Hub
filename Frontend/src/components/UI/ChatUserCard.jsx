@@ -1,8 +1,9 @@
+import { useChatContext } from "../../context/chatContext"
 
-export const ChatUserCard = ({ friend, setCurrentChatUser, isOnline, isTyping }) => {
-
+export const ChatUserCard = ({ friend, isOnline, isTyping }) => {
+  const {setCurrentChat} = useChatContext();
   const handleOnclick = () => {
-    setCurrentChatUser(friend)
+    setCurrentChat(friend)
   }
 
   return (

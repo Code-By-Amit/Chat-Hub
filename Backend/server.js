@@ -6,9 +6,10 @@ const cors = require('cors')
 const { connectToDB } = require('./connectToDB')
 
 const authRoute = require('./routes/auth.routes')
-const friendRequestRoute = require('./routes/friendRequest.routes')
+const invitation = require('./routes/invitation.routes')
 const messageRoute = require('./routes/message.routes')
 const userRoute = require('./routes/user.routes')
+const groupRoute = require('./routes/group.routes')
 
 const PORT = process.env.PORT || 4000
 
@@ -23,8 +24,9 @@ app.use(express.urlencoded({ extended: true }))
 
 app.use('/auth', authRoute)
 app.use('/user', userRoute)
-app.use('/friendrequest',friendRequestRoute)
+app.use('/invitation',invitation)
 app.use('/message',messageRoute)
+app.use('/group',groupRoute)
 
 
 app.get('/', (req, res) => {

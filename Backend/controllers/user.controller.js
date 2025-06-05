@@ -1,3 +1,4 @@
+const Chat = require("../models/chat.model");
 const User = require("../models/user.model");
 const { uploadOnCloudinary, deleteFromCloudinary } = require("../utils/uploadOnCloudinary");
 
@@ -47,7 +48,7 @@ async function updateUser(req, res) {
 async function getUserFriends(req, res) {
     try {
         const userId = req.userId;
-        const friends = await User.findById(userId).populate({ path: 'friends', select: "fullName avatar bio username" }).select('friends')
+        const friends = await User.findById(userId).populate({ path: 'friends', select: "fullName avatar bio username publicKey" }).select('friends')
         res.status(200).json(friends)
     } catch (error) {
         console.log('Error in getUserFriends Handeler ', error.message)
@@ -58,8 +59,7 @@ async function getUserFriends(req, res) {
 async function searchUserByName(req, res) {
     try {
         const { search, limit=5 } = req.query;
-        console.log(req.query)
-        const users = await User.find({ fullName: RegExp(search, 'i') }).limit(Number(limit))
+        const users = await User.find({ fullName: RegExp(search, 'i') }).limit(Number(limit)).lean()
         res.status(200).json(users)
     } catch (error) {
         console.log('Error in searchUserByName Handeler ', error.message)
@@ -67,4 +67,24 @@ async function searchUserByName(req, res) {
     }
 }
 
-module.exports = { updateUser, getUserFriends, searchUserByName }
+async function unfriendFriend(req,res){
+    try {
+        const {friendId} = req.params;
+        const userId = req.userId;
+        
+        let conversationChat = await Chat.findOneAndDelete({members:{$in:[friendId,userId]}});
+        if(!conversationChat){
+            return res.status(400).json({message:"Chat Not Found"})
+        }
+
+        await Chat.deleteMany({chatId:conversationChat.chatId})
+        
+        res.status(200).json({message:"Unfriended successfully"})
+
+    } catch (error) {
+        console.log('Error in searchUserByName Handeler ', error.message)
+        res.status(500).json({ message: "Internal Server Error", error: error.message })
+    }
+}
+
+module.exports = { updateUser, getUserFriends, searchUserByName ,unfriendFriend}

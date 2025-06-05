@@ -2,19 +2,24 @@ const mongoose = require('mongoose')
 
 const chatSchema = new mongoose.Schema({
     groupName: {
-        type: String          // for Group Chats
+        type: String,          // for Group Chats
+        maxlength: 100
     },
     groupAdmin: {
-        type: mongoose.Schema.Types.ObjectId,    // for Group Chats
+        type: mongoose.Schema.Types.ObjectId,    // For Group Chats
         ref: "User"
     },
     isGroupChat: {                              // For Group Chats
         type: Boolean,
         default: false
     },
-    groupAvatar: {
+    groupAvatar: {                              // For Group Chats
         type: String,
         default: ""
+    },
+    isMembersCanInvite: {                       // For Group Chats
+        type: Boolean,
+        default: false
     },
     members: [{
         type: mongoose.Schema.Types.ObjectId,

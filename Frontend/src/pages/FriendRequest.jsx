@@ -4,7 +4,7 @@ import { MdOutlineTimer } from "react-icons/md";
 import { BsFillSendPlusFill } from "react-icons/bs";
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { authUser } from '../context/authUser';
-import { acceptRequest, declineRequest, fetchIncommingRequest, fetchOutgoingRequest, sendFriendRequest } from '../apis/chatApis';
+import { acceptGroupInvitation, acceptRequest, declineRequest, fetchIncommingRequest, fetchOutgoingRequest, sendFriendRequest } from '../apis/chatApis';
 import toast from 'react-hot-toast';
 import { searchUserApi } from '../apis/user';
 import { useDebounce } from '../hooks/debounce';
@@ -37,7 +37,10 @@ export const FriendRequest = () => {
 
   const acceptRequestMutation = useMutation({
     mutationKey: ['acceptRequest'],
-    mutationFn: (reqId) => acceptRequest(reqId, token),
+    mutationFn: ({reqId,isForGroup}) =>{
+      if(isForGroup) return acceptGroupInvitation(reqId,token)
+      else return acceptRequest(reqId, token)
+    },
     onMutate: () => {
       const toastId = toast.loading("Processing Action....")
       return { toastId }
@@ -148,12 +151,13 @@ export const FriendRequest = () => {
               ) : (
                 incommingRequests?.map((request) => (
                   <ProfileBars
-                    key={request._id}
-                    id={request._id}
-                    name={request.from.fullName}
+                    key={request?._id}
+                    id={request?._id}
+                    name={request.isForGroup ? request.group.groupName : request?.from.fullName}
                     declineRequestMutation={declineRequestMutation}
                     acceptRequestMutation={acceptRequestMutation}
-                    avatar={request.from.avatar}
+                    avatar={request?.isForGroup ? request?.group?.groupAvatar: request?.from?.avatar}
+                    invitedBy={request?.from?.fullName}
                     card="Incomming"
                   />
                 ))
@@ -173,10 +177,10 @@ export const FriendRequest = () => {
               ) : (
                 outgoingRequests?.map((request) => (
                   < ProfileBars
-                    key={request._id}
-                    id={request._id}
-                    name={request.to.fullName}
-                    avatar={request.to.avatar}
+                    key={request?._id}
+                    id={request?._id}
+                    name={request?.to?.fullName}
+                    avatar={request?.to?.avatar}
                     card="Outgoing"
                   />
                 ))
@@ -189,22 +193,23 @@ export const FriendRequest = () => {
   )
 }
 
-const ProfileBars = ({ id, name, avatar, card, acceptRequestMutation, declineRequestMutation, sendFriendRequestMutation }) => {
+const ProfileBars = ({ id, name, avatar, card, acceptRequestMutation, declineRequestMutation, sendFriendRequestMutation, invitedBy }) => {
   return (
     <div key={id} className="card bg-gray-50 dark:bg-gray-600 rounded-md p-4 flex items-center justify-between">
-      <div className="flex gap-3">
+      <div className="flex gap-4">
         <div className="w-10 h-10 ring-2 ring-orange-400 ring-offset-2 overflow-hidden rounded-full">
-          <img className="w-full h-full object-contain" src={avatar} alt={name} />
+          <img className="w-full h-full object-cover" src={avatar} alt={name} />
         </div>
-        <div>
+        <div className='leading-5'>
           <h5 className="font-semibold dark:text-gray-50">{name}</h5>
+          {invitedBy && <span className='text-sm text-gray-800 dark:text-gray-200'>- Invited by {invitedBy}</span> }
         </div>
       </div>
       <div className="flex gap-2 items-center">
         {card === "Incomming" ? (
           <>
             <button onClick={() => {
-              acceptRequestMutation.mutate(id)
+              acceptRequestMutation.mutate({reqId:id,isForGroup:!!invitedBy})
             }} className="px-4 py-1 border-none outline-none bg-orange-400 text-white rounded-2xl cursor-pointer transition ease-in-out duration-300 hover:scale-105 hover:shadow-xl">
               Accept
             </button>

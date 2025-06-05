@@ -1,4 +1,3 @@
-import { useState } from 'react'
 import './App.css'
 import { BrowserRouter, Route, Routes } from 'react-router-dom'
 import { Signup } from './pages/Signup'
@@ -8,7 +7,6 @@ import { FriendRequest } from './pages/FriendRequest'
 import { ProfilePage } from './pages/ProfilePage'
 import { ProfileEdit } from './pages/ProfileEdit'
 import { Login } from './pages/Login'
-import { authUser } from './context/authUser'
 import { ProtectedRoute } from './ProtectedRoute'
 
 function App() {
@@ -16,7 +14,7 @@ function App() {
   return (
     <BrowserRouter>
       <Routes>
-        <Route path='/' element={ <Login />} />
+        <Route path='/' element={<Login />} />
         <Route path='/signup' element={<Signup />} />
         <Route path='/chat' element={<ProtectedRoute><MainLayout /></ProtectedRoute>}>
           <Route path='' element={<ChatPage />} />

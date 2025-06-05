@@ -12,10 +12,15 @@ const messageSchama = new mongoose.Schema({
         ref: "User",
         required: true
     },
-    message: {
+    encryptedMessage: {
         type: String,
         required: true,
         maxlength: [500, "Message can't be more than 500 characters."],
+    },
+    encryptedAESKeys: {
+        type: Map,
+        of: String,
+        default: {}
     },
     image: {
         type: String,
@@ -24,6 +29,6 @@ const messageSchama = new mongoose.Schema({
 
 messageSchama.index({ chatId: 1, sender: 1 })
 
-const Message = mongoose.model("Message",messageSchama)
+const Message = mongoose.model("Message", messageSchama)
 
 module.exports = Message

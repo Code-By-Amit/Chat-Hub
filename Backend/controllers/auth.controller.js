@@ -3,7 +3,7 @@ const generateTokenAndSetCookie = require("../utils/generateCookieAndSetCookie")
 
 async function signupUser(req, res) {
     try {
-        const { fullName, username, password ,gender} = req.body;
+        const { fullName, username, password ,gender, publicKey ,encryptedPrivateKey } = req.body;
 
         let user = await User.findOne({ username })
         if (user) {
@@ -19,7 +19,9 @@ async function signupUser(req, res) {
             fullName,
             username,
             password,
-            avatar
+            avatar,
+            publicKey,
+            encryptedPrivateKey
         })
 
         const token = generateTokenAndSetCookie(user._id, res);
@@ -45,7 +47,7 @@ async function loginUser(req, res) {
 
         const token = generateTokenAndSetCookie(user._id, res)
 
-        res.status(200).json({ message: `Welcome back, ${user.fullName}!`, token })
+        res.status(200).json({ message: `Welcome back, ${user.fullName}!`,encryptedPrivateKey: user.encryptedPrivateKey, token })
 
     } catch (error) {
         console.log('Error in Login Handeler', error)

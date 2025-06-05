@@ -1,16 +1,20 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { ChatArea } from './ChatArea';
-import { FriendListPannel } from './FriendListPannel';
+import { FriendAndGroupListPannel } from './FriendAndGroupListPannel';
+import { useChatContext } from '../../context/chatContext';
+import { ChatInfoModal } from '../../components/UI/ChatInfoModal';
 
 
 export const ChatPage = () => {
-  const [currentChatUser, setCurrentChatUser] = useState(null)
-
+   const [isChatInfoModalOpen, setIsChatInfoModalOpen] = useState(false)
   return (
+    <>
     <div className='w-full h-screen flex bg-gray-200 dark:bg-gray-900'>
-      <FriendListPannel setCurrentChatUser={setCurrentChatUser} />
-      <ChatArea currentChatUser={currentChatUser} setCurrentChatUser={setCurrentChatUser} />
+      <FriendAndGroupListPannel />
+      <ChatArea setIsChatInfoModalOpen={setIsChatInfoModalOpen}  isChatInfoModalOpen={isChatInfoModalOpen}/>
     </div >
+      
+    </>
   )
 }
 

@@ -6,13 +6,15 @@ import { BiSolidCheckShield } from "react-icons/bi";
 import { LuEye, LuEyeClosed } from "react-icons/lu";
 import { CiEdit } from "react-icons/ci";
 import { authUser } from '../context/authUser';
+import { encryptPrivateKey, generateRSAKeys } from '../Encryption/rsa';
+import { storePrivateKey } from '../utils/indexDb';
 
 export const Signup = () => {
     const [isPassVisible, setIsPassVisible] = useState(false)
     const [isConfPassVisible, setIsConfPassVisible] = useState(false)
     const [formData, setFormData] = useState({ username: "", password: "", fullName: "", confPassword: "", gender: "" })
     const [errors, setErrors] = useState([])
-
+    const {setPrivateKey} = authUser();
     const navigate = useNavigate()
 
     const { signupMutation } = authUser()
@@ -61,9 +63,15 @@ export const Signup = () => {
             gender: formData.gender.trim()
         }
 
-        signupMutation.mutate(trimmedData, {
-            onSuccess: () => {
+
+        const { publicKey, privateKey } = generateRSAKeys();
+        const encryptedPrivateKey = encryptPrivateKey(privateKey, trimmedData.password);
+       
+        signupMutation.mutate({ ...trimmedData, publicKey, encryptedPrivateKey }, {
+            onSuccess: async() => {
                 navigate('/chat')
+                await storePrivateKey(privateKey);
+                setPrivateKey(privateKey);
                 setFormData({ username: "", password: "", fullName: "", confPassword: "", gender: "" })
             }
         });

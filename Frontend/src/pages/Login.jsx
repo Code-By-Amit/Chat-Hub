@@ -4,12 +4,16 @@ import { FaUser } from "react-icons/fa";
 import { MdOutlinePassword } from "react-icons/md";
 import { LuEye, LuEyeClosed } from "react-icons/lu";
 import { authUser } from '../context/authUser';
+import { storePrivateKey } from '../utils/indexDb';
+import { decryptPrivateKey, encryptPrivateKey, generateRSAKeys } from '../Encryption/rsa';
+import { setKeys } from '../apis/user';
 
 export const Login = () => {
     const [isPassVisible, setIsPassVisible] = useState(false)
     const [credentials, setCredentials] = useState({ username: "", password: "" });
     const [errors, setErrors] = useState([]);
     const token = localStorage.getItem('token')
+    const { setPrivateKey } = authUser();
 
     const { loginMutation } = authUser()
     const navigate = useNavigate()
@@ -42,12 +46,22 @@ export const Login = () => {
     const handleLoginFormOnSubmit = (e) => {
         e.preventDefault()
 
-        if (!validate()) return
+        if (!validate()) return;
 
         loginMutation.mutate(credentials, {
-            onSuccess: () => {
-                navigate('/chat')
+            onSuccess: async (data) => {
+                if (!data.encryptedPrivateKey) {
+                    const { publicKey, privateKey } = generateRSAKeys();
+                    const encryptedPrivateKey = encryptPrivateKey(privateKey, credentials.password);
+                    setKeys({ publicKey, encryptedPrivateKey },data.token);
+                    await storePrivateKey(privateKey);
+                } else {
+                    const privateKey = decryptPrivateKey(data.encryptedPrivateKey, credentials.password);
+                    await storePrivateKey(privateKey);
+                    setPrivateKey(privateKey);
+                }
                 setCredentials({ username: "", password: "" })
+                navigate('/chat');
             }
         });
     }

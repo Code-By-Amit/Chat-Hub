@@ -13,6 +13,9 @@ function isAuthenticated(req, res, next) {
             req.userId = decoded.userId;
             next()
     } catch (error) {
+        if (error.name === 'TokenExpiredError') {
+            return res.status(401).json({ message: "Token Expired. Please log in again." });
+        }
         console.log("Error in isAuthenitcated MiddleWare. Error: ", error)
         res.status(500).json({ message: "Internal Server Error" })
     }

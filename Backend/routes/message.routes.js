@@ -5,6 +5,6 @@ const upload = require('../middlewares/multer')
 const router = require('express').Router()
 
 router.post('/send',isAuthenticated,upload.single('image'),sendMessage)
-router.get('/getmessage/:toUserId',isAuthenticated,getMessage)
+router.get('/getmessage',isAuthenticated,getMessage)
 
 module.exports = router

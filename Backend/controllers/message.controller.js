@@ -5,20 +5,20 @@ const { uploadOnCloudinary } = require("../utils/uploadOnCloudinary");
 
 async function sendMessage(req, res) {
     try {
-        const { message, chatId, reciverId } = req.body;
+        let { encryptedMessage, chatId, reciverId,encryptedAESKeys } = req.body;
         const userId = req.userId;
 
         let chat
         if (chatId) {
-            chat = await Chat.findById(chatId)
+            chat = await Chat.findById(chatId).select('members isGroupChat'); 
             if (!chat) {
                 return res.status(404).json({ message: "Group Chat Not Found" })
             }
         } else {
             chat = await Chat.findOne({
                 isGroupChat: false,
-                members: { $in: [reciverId, userId] }
-            })
+                members: { $all: [reciverId, userId], $size:2 }
+            }).select('members isGroupChat'); 
         }
 
         let image;
@@ -27,22 +27,31 @@ async function sendMessage(req, res) {
             image = response.secure_url
         }
 
+        if (typeof encryptedAESKeys === "string") {
+            encryptedAESKeys = JSON.parse(encryptedAESKeys);
+        }
+
         const newMessage = await Message.create({
             chatId: chat._id,
-            message,
+            encryptedMessage,
+            encryptedAESKeys,
             sender: userId,
             image
         })
 
-        await newMessage.populate('sender');
+        await newMessage.populate('sender', '_id avatar fullName');
+        if(chatId){
+            await newMessage.populate('chatId')
+        }
 
         const memberSocketIds = await Promise.all(
             chat.members.map(member => getReciverSocketId(member)) // Then map and resolve promises
         );
-
+        
         memberSocketIds.forEach(member => {
-            io.to(member).emit("newMessage", newMessage)
+            io.to(member).emit("newMessage", newMessage.toJSON());
         });
+
 
         res.status(200).json({ message: "Message Sent" })
 
@@ -54,12 +63,13 @@ async function sendMessage(req, res) {
 
 async function getMessage(req, res) {
     try {
-        const { chatId, toUserId } = req.params;
+        const { chatId, toUserId } = req.query;
+        // const { page = 1, limit = 3 } = req.query;
         const fromUserId = req.userId;
 
         let chat
         if (chatId) {
-            chat = await Chat.findById(chatId)
+            chat = await Chat.findById(chatId).lean()
             if (!chat) {
                 return res.status(404).json({ message: "Group Chat Not Found" })
             }
@@ -67,7 +77,7 @@ async function getMessage(req, res) {
             chat = await Chat.findOne({
                 isGroupChat: false,
                 members: { $all: [toUserId, fromUserId] }
-            })
+            }).lean()
             if (!chat) {
                 chat = await Chat.create({
                     isGroupChat: false,
@@ -75,8 +85,11 @@ async function getMessage(req, res) {
                 })
             }
         }
+ 
+        // const messages = await Message.find({ chatId: chat._id }).skip((page - 1) * Number(limit)).limit(Number(limit)).populate('sender', 'avatar fullName username')
+        const messages = await Message.find({ chatId: chat._id }).sort({createdAt:1}).populate('sender', 'avatar fullName username').lean()
+        
 
-        const messages = await Message.find({ chatId: chat._id }).sort({ createdAt: 1 }).populate('sender', 'avatar fullName username')
         res.status(200).json({ messages })
     } catch (error) {
         console.log('Error in getMessage Handeler ', error.message)

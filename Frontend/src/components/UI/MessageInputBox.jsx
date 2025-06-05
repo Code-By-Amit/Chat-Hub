@@ -8,9 +8,15 @@ import { LuImagePlus } from "react-icons/lu";
 import { GrFormClose } from "react-icons/gr";
 import { useMutation } from '@tanstack/react-query';
 import { sendMessageApi } from '../../apis/chatApis';
+import { encryptMessage, generateAESKey } from '../../Encryption/aes';
+import { useAESKey } from '../../hooks/useAESKey';
+import { encryptAESKey } from '../../Encryption/rsa';
+import toast from 'react-hot-toast';
+import { useChatContext } from '../../context/chatContext';
 
 
-export const MessageInputBox = ({ currentChatUser, setMessages }) => {
+export const MessageInputBox = () => {
+    const { currentChat } = useChatContext();
     const [token, setToken] = useState(localStorage.getItem('token') || null)
     const { socket } = useSocketContext()
     const [isTyping, setIsTyping] = useState(false);
@@ -20,6 +26,8 @@ export const MessageInputBox = ({ currentChatUser, setMessages }) => {
     const [inputMessage, setInputMessage] = useState('')
     const [inputImage, setInputImage] = useState(null)
     const { user } = authUser()
+
+    const { aesKey, regenerateKey } = useAESKey();
 
     const sendMessageMutation = useMutation({
         mutationKey: ['sendMessage'],
@@ -33,21 +41,57 @@ export const MessageInputBox = ({ currentChatUser, setMessages }) => {
     })
 
     const handleSendMessage = (message) => {
-        if (message.trim() === "") return
-        const payload = {
-            to: currentChatUser?._id,
-            from: user?._id
+        if (message.trim() === "") return;
+        if (!aesKey) {
+            toast.error("Encryption key missing. Please try again.");
+            return;
         }
-        socket.emit("stopTyping", payload)
+
+        const members = currentChat?.isGroupChat ? currentChat?.members : [currentChat];
+        console.log(members)
+        for (const member of members) {
+            if (!member.publicKey) {
+                toast.error(`Missing public key for ${member.fullName || 'a user'}`);
+                return;
+            }
+        }
+
+        for (const member of members) {
+            const payload = {
+                to: member?._id,
+                from: user?._id
+            }
+            socket.emit("stopTyping", payload)
+        }
+
 
         const messageFormData = new FormData()
+        if (currentChat?.isGroupChat) {
+            messageFormData.append('chatId', currentChat._id);
+        } else {
+            messageFormData.append('reciverId', currentChat._id);
+        }
 
-        messageFormData.append('reciverId', currentChatUser._id)
-        messageFormData.append('message', message)
+
+        const encryptedMessage = encryptMessage(inputMessage, aesKey);
+
+        const encryptedAesKeysMap = {};
+        for (const member of members) {
+            let reciverPublicKey = currentChat.isGroupChat ? member?.publicKey : currentChat.publicKey
+            const encryptedAESKey = encryptAESKey(aesKey, reciverPublicKey);
+            encryptedAesKeysMap[member._id] = encryptedAESKey;
+        }
+
+        const encrypedAESKeyForSender = encryptAESKey(aesKey, user.publicKey);
+        encryptedAesKeysMap[user._id] = encrypedAESKeyForSender;
+        
+        messageFormData.append('encryptedMessage', encryptedMessage);
+        messageFormData.append('encryptedAESKeys', JSON.stringify(encryptedAesKeysMap));
 
         if (inputImage) {
             messageFormData.append('image', inputImage)
         }
+
         sendMessageMutation.mutate(messageFormData)
     }
 
@@ -58,7 +102,7 @@ export const MessageInputBox = ({ currentChatUser, setMessages }) => {
         }
         setInputMessage(e.target.value);
         const payload = {
-            to: currentChatUser?._id,
+            to: currentChat?._id,
             from: user?._id
         }
 
@@ -115,7 +159,7 @@ export const MessageInputBox = ({ currentChatUser, setMessages }) => {
 
     return (
         <div className='sticky bottom-0 left-0 w-full border-gray-300 border-t dark:bg-gray-800 bg-gray-100  p-2'>
-            <div className='w-full h-15 flex items-center  p-2 rounded-lg'>
+            <div className='w-full h-16 flex items-center  p-2 rounded-lg'>
                 <div className={`absolute bottom-20 transition ease-in-out duration-300 left-5 ${isEmojiOpen ? "block" : "hidden"}`}>
                     <EmojiPicker open={true} lazyLoadEmojis={true} emojiStyle='apple' className='z-50' onEmojiClick={handleEmojiClick} height={400} />
                 </div>
@@ -150,6 +194,7 @@ export const MessageInputBox = ({ currentChatUser, setMessages }) => {
                             }
                         }}
                         placeholder='Type a message...' />
+
                 </div>
                 <div className='bg-orange-400 cursor-pointer text-white px-4 md:px-6 mx-2 rounded flex items-center justify-center h-full gap-2'>
                     <p onClick={() => {
