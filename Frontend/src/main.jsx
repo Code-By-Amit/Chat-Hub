@@ -8,6 +8,8 @@ import { Toaster } from 'react-hot-toast'
 import { SocketContextProvider } from './context/useSocketContext.jsx'
 import './index.css'
 import { ChatProvider } from './context/chatContext.jsx'
+// import { registerSW } from 'virtual:pwa-register'
+// registerSW()
 
 const queryClient = new QueryClient()
 
