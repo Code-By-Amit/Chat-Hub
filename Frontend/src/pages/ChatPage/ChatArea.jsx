@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react'
 import { ProfileBar } from '../../components/UI/ProfileBar';
 import { MessageInputBox } from '../../components/UI/MessageInputBox';
-import {  useQuery } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import { useSocketContext } from '../../context/useSocketContext';
 import { getMessagesApi } from '../../apis/chatApis';
 import { authUser } from '../../context/authUser';
@@ -12,34 +12,47 @@ import { TypingDots } from '../../components/UI/TypingDots';
 import { useChatContext } from '../../context/chatContext';
 import { ChatInfoModal } from '../../components/UI/ChatInfoModal';
 
-export const ChatArea = ({setIsChatInfoModalOpen,isChatInfoModalOpen}) => {
-    const {currentChat, setCurrentChat} = useChatContext();
+export const ChatArea = ({ setIsChatInfoModalOpen, isChatInfoModalOpen }) => {
+    const { currentChat, setCurrentChat } = useChatContext();
     const [token, setToken] = useState(localStorage.getItem('token') || null)
     const { user, privateKey } = authUser()
     const { socket, onlineUsers, typingStatus } = useSocketContext();
-    const messageScrollDivRef = useRef(null)
-
 
     const chatEndRef = useRef()
 
     const { data: conversationData = {}, isLoading: isLoadingMessage } = useQuery({
         queryKey: ['getMessages', currentChat?._id],
-        queryFn: () => getMessagesApi(currentChat?._id,currentChat?.isGroupChat, token),
+        queryFn: () => getMessagesApi(currentChat?._id, currentChat?.isGroupChat, token),
         enabled: !!token && !!currentChat,
     })
 
-    // const handleScroll = (e) => {
-    //     const { scrollTop } = e.target;
-    //     const scrollHeight = e.target.scrollHeight;
-    //     const clientHeight = e.target.clientHeight;
-    //     console.log(e)
-    //     // When the user scrolls to the top and there are more messages to load
-    //     if (scrollTop === 0 && hasNextPage && !isFetchingNextPage) {
-    //         fetchNextPage();
-    //     }
-    // };
+    useEffect(() => {
+        if (!socket) return;
+        if (currentChat) {
+            socket.emit('activeChat', { chatWith: currentChat._id, isChatWithGroup: currentChat?.isForGroup });
+        } else {
+            socket.emit('activeChat', { chatWith: null });
+        }
+    }, [currentChat, socket])
 
     const [messages, setMessages] = useState([])
+
+    useEffect(() => {
+        if (!socket || !messages.length || !currentChat) return;
+
+        const unreadMessages = messages.filter(
+            msg => msg.status !== 'read' && msg.status !== 'pending'
+        );
+
+        if (unreadMessages.length) {
+            const messageIds = unreadMessages.map(m => m._id);
+            socket.emit('messageRead', {
+                chatId: currentChat._id,
+                isGroupChat:currentChat?.isGroupChat,
+                messageIds
+            });
+        }
+    }, [messages, currentChat]);
 
     useEffect(() => {
         if (currentChat) {
@@ -48,8 +61,22 @@ export const ChatArea = ({setIsChatInfoModalOpen,isChatInfoModalOpen}) => {
     }, [currentChat])
 
     useEffect(() => {
+        if (!socket) return;
+
+        socket.on('message-read', ({ messageId }) => {
+            setMessages(prevMessages =>
+                prevMessages.map(msg => {
+                    return msg?._id.toString() === messageId.toString() ? { ...msg, status: 'read' } : msg
+                })
+            );
+        });
+        return () => socket.off('message-read');
+    }, [socket, currentChat]);
+
+
+    useEffect(() => {
         if (conversationData?.length > 0) {
-            const msgData = conversationData.map((msg)=>{
+            const msgData = conversationData.map((msg) => {
                 const aesKey = decryptAESKey(msg?.encryptedAESKeys[user?._id], privateKey);   // Decrypt AES Key
                 const message = decryptMessage(msg.encryptedMessage, aesKey);     // Decrypt Message
                 const decryptedMessage = {
@@ -57,7 +84,8 @@ export const ChatArea = ({setIsChatInfoModalOpen,isChatInfoModalOpen}) => {
                     sender: msg.sender,
                     message,
                     createdAt: msg.createdAt,
-                    _id: msg._id
+                    _id: msg._id,
+                    status: msg.status
                 }
                 return decryptedMessage;
             })
@@ -72,13 +100,14 @@ export const ChatArea = ({setIsChatInfoModalOpen,isChatInfoModalOpen}) => {
         const handleNewMessage = (newMessage) => {
             const aesKey = decryptAESKey(newMessage?.encryptedAESKeys[user?._id], privateKey);   // Decrypt AES Key
             const message = decryptMessage(newMessage.encryptedMessage, aesKey);     // Decrypt Message
-            console.log("new message:",newMessage)
+
             setMessages(prevMsg => ([...prevMsg, {
                 image: newMessage.image,
                 sender: newMessage.sender,
                 message: message,
                 createdAt: newMessage.createdAt,
-                _id: newMessage._id
+                _id: newMessage._id,
+                status: newMessage.status
             }]))
         }
         socket.on('newMessage', handleNewMessage)
@@ -91,6 +120,7 @@ export const ChatArea = ({setIsChatInfoModalOpen,isChatInfoModalOpen}) => {
 
     const groupedMessages = useMemo(() => {
         if (!messages.length || !privateKey) return {};
+
         const finalMsg = {};
         messages.forEach(msg => {
             const msgDate = new Date(msg.createdAt).toLocaleDateString('en-GB', {
@@ -99,9 +129,7 @@ export const ChatArea = ({setIsChatInfoModalOpen,isChatInfoModalOpen}) => {
                 month: "long",
                 day: "numeric"
             });
-            if (!finalMsg[msgDate]) {
-                finalMsg[msgDate] = [];
-            }
+            if (!finalMsg[msgDate]) finalMsg[msgDate] = [];
             finalMsg[msgDate].push(msg);
         });
         return finalMsg;
@@ -126,7 +154,7 @@ export const ChatArea = ({setIsChatInfoModalOpen,isChatInfoModalOpen}) => {
                             {/* Message Area */}
                             <div id="scrollableDiv" className='w-full flex-1 overflow-y-auto custom-scrollbar'>
                                 <div className='w-full py-4 px-7 overflow-y-auto flex flex-col gap-1 justify-end '>
-                    
+
                                     {isLoadingMessage ?
                                         (<div className='w-full h-full flex justify-center items-center'>
                                             <div className="loader"></div>
@@ -158,7 +186,7 @@ export const ChatArea = ({setIsChatInfoModalOpen,isChatInfoModalOpen}) => {
                             <p className='text-lg font-semibold text-gray-800 dark:text-gray-100'>Select User To Start Chat.</p>
                         </div>
                 }
-               { isChatInfoModalOpen && <ChatInfoModal setIsChatInfoModalOpen={setIsChatInfoModalOpen} isChatInfoModalOpen={isChatInfoModalOpen} />  }
+                {isChatInfoModalOpen && <ChatInfoModal setIsChatInfoModalOpen={setIsChatInfoModalOpen} isChatInfoModalOpen={isChatInfoModalOpen} />}
             </div>
         </>
     )

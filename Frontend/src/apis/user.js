@@ -13,7 +13,7 @@ export const signupApi = (formData) => api.post("/auth/signup", formData).then(r
 
 export const logoutApi = () => api.post("/auth/logout").then(res => res.data)
 
-export const fetchUserFriends = (token) => api.get("/user/friends", { headers: { Authorization: `Bearer ${token}` } }).then(res => res.data.friends)
+export const fetchUserFriends = (token) => api.get("/user/friends", { headers: { Authorization: `Bearer ${token}` } }).then(res => res.data)
 
 export const unFriendfriendApi = (friendId, token) => api.patch(`/user/friends/unfriend/${friendId}`,{}, { headers: { Authorization: `Bearer ${token}` } }).then(res => res.data)  
 
@@ -22,3 +22,6 @@ export const searchUserApi = (search, token) => api.get(`/user?search=${search}`
 export const editUserProfileApi = (data, token) => api.patch(`/user/update`, data, { headers: { Authorization: `Bearer ${token}` } }).then(res => res.data)
 
 export const setKeys = (keys,token) => api.post(`/auth/setkeys`,keys, { headers: { Authorization: `Bearer ${token}` } }).then(res => res.data)
+
+
+export const messageSubscriptionApi = (subscription,token) => api.post(`api/subscribe`,subscription, { headers: { Authorization: `Bearer ${token}` } }).then(res => res.data)

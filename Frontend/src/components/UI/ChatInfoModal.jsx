@@ -9,6 +9,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { searchUserApi, unFriendfriendApi } from '../../apis/user';
 import { inviteToGroup, leaveGroupApi } from '../../apis/chatApis';
 import { authUser } from '../../context/authUser';
+import { useSocketContext } from '../../context/useSocketContext';
 
 export const ChatInfoModal = ({ setIsChatInfoModalOpen }) => {
   const { currentChat } = useChatContext();
@@ -18,6 +19,7 @@ export const ChatInfoModal = ({ setIsChatInfoModalOpen }) => {
   const debouncedSearch = useDebounce(search, 500)
   let isGroupChat = currentChat?.isGroupChat
   const token = localStorage.getItem('token')
+  const {onlineUsers} = useSocketContext()
   const {user} = authUser();
   useEffect(() => {
     setSearch("")
@@ -33,7 +35,7 @@ export const ChatInfoModal = ({ setIsChatInfoModalOpen }) => {
 
   return (
     <>
-      <div className={`h-full  w-[75%] md:w-[38%] z-10 absolute right-0 md:right-2 rounded-sm max-h-[98vh] bg-gray-100 dark:bg-gray-700 shadow-2xl `}>
+      <div className={`h-full z-50 w-[75%] md:w-[38%] absolute right-0 md:right-2 rounded-sm max-h-[98vh] bg-gray-100 dark:bg-gray-700 shadow-2xl `}>
         <div onClick={() => setIsChatInfoModalOpen(false)
 
         } className='absolute right-3 top-4 dark:bg-gray-800 dark:hover:bg-gray-600 rounded-full dark:text-white cursor-pointer items-center p-1.5'>
@@ -72,7 +74,7 @@ export const ChatInfoModal = ({ setIsChatInfoModalOpen }) => {
 
           <div className='flex flex-col w-full h-72 p-2 gap-2 overflow-y-auto custom-scrollbar'>
             {!isInviteOpen && isGroupChat &&
-              currentChat.members.map(member => <Member key={member?._id} member={member} adminId={currentChat.groupAdmin} />)
+              currentChat.members.map(member => <Member key={member?._id} member={member} adminId={currentChat.groupAdmin} isOnline={onlineUsers.includes(member._id)} />)
             }
             {
               isInviteOpen && searchedUsers && searchedUsers.map(user => {
@@ -138,7 +140,7 @@ const LeaveRemoveModal = ({ onClose,setIsChatInfoModalOpen }) => {
   );
 };
 
-const Member = ({ member, adminId, isforInvitaition }) => {
+const Member = ({ member, adminId, isforInvitaition , isOnline}) => {
   const { currentChat } = useChatContext()
   let token = localStorage.getItem('token')
   const inviteMemberMutation = useMutation({
@@ -157,6 +159,7 @@ const Member = ({ member, adminId, isforInvitaition }) => {
           <div className='w-10 h-10 ring-2 rounded-full overflow-hidden ring-orange-400 ring-offset-2'>
             <img className='w-full h-full object-cover' src={member.avatar} alt={member.fullName} />
           </div>
+           {isOnline && (<span className="absolute w-2 h-2 bg-green-500 ring-2 ring-white bottom-0.5 right-0 rounded-full" />)}
         </div>
         <div>
           <p className='text-md font-semibold dark:text-gray-50'>{member.fullName}</p>

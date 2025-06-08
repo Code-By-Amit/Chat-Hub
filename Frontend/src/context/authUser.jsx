@@ -3,7 +3,7 @@ import { createContext, useContext, useEffect, useState } from "react";
 import { fetchAuthUser, loginApi, logoutApi, setKeys, signupApi } from "../apis/user";
 import toast from 'react-hot-toast';
 import { clearStoredPrivateKey, getStoredPrivateKey } from "../utils/indexDb";
-import { generateRSAKeys } from "../Encryption/rsa";
+
 
 const UserContext = createContext()
 

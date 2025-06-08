@@ -6,16 +6,19 @@ import EmojiPicker from 'emoji-picker-react';
 import { FaRegSmileWink } from "react-icons/fa";
 import { LuImagePlus } from "react-icons/lu";
 import { GrFormClose } from "react-icons/gr";
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { sendMessageApi } from '../../apis/chatApis';
 import { encryptMessage, generateAESKey } from '../../Encryption/aes';
 import { useAESKey } from '../../hooks/useAESKey';
 import { encryptAESKey } from '../../Encryption/rsa';
 import toast from 'react-hot-toast';
 import { useChatContext } from '../../context/chatContext';
+import { v4 as uuidv4 } from 'uuid';
+import { updateFriendLastMessage } from '../../utils/updateLastMessage';
+import { formattedTime } from '../../utils/formatedDate';
 
 
-export const MessageInputBox = () => {
+export const MessageInputBox = ({ setMessages }) => {
     const { currentChat } = useChatContext();
     const [token, setToken] = useState(localStorage.getItem('token') || null)
     const { socket } = useSocketContext()
@@ -26,29 +29,26 @@ export const MessageInputBox = () => {
     const [inputMessage, setInputMessage] = useState('')
     const [inputImage, setInputImage] = useState(null)
     const { user } = authUser()
+    const queryClient = useQueryClient()
 
     const { aesKey, regenerateKey } = useAESKey();
 
     const sendMessageMutation = useMutation({
         mutationKey: ['sendMessage'],
-        mutationFn: (formdata) => sendMessageApi(formdata, token),
-        onSuccess: () => {
-            URL.revokeObjectURL(previewInputImage)
-            setInputMessage('')
-            setPreviewInputImage(null)
-            setInputImage(null)
-        }
+        mutationFn: (formdata) => sendMessageApi(formdata, token)
     })
 
+
+
     const handleSendMessage = (message) => {
-        if (message.trim() === "") return;
+        if (message.trim() === "" && previewInputImage === null) return;
         if (!aesKey) {
             toast.error("Encryption key missing. Please try again.");
             return;
         }
 
         const members = currentChat?.isGroupChat ? currentChat?.members : [currentChat];
-        console.log(members)
+
         for (const member of members) {
             if (!member.publicKey) {
                 toast.error(`Missing public key for ${member.fullName || 'a user'}`);
@@ -64,6 +64,31 @@ export const MessageInputBox = () => {
             socket.emit("stopTyping", payload)
         }
 
+        const now = new Date().toISOString();
+        const tempMessageId = uuidv4();
+        const tempMsg = {
+            _id: tempMessageId,
+            image: previewInputImage ? previewInputImage : null,
+            createdAt: now,
+            status: 'pending',
+            chatId: currentChat?._id,
+            message,
+            sender: {
+                _id: user?._id,
+                avatar: user?.avatar,
+                fullName: user?.fullName
+            }
+        }
+        setMessages(prev => [...prev, tempMsg])
+
+        updateFriendLastMessage({
+            queryClient,
+            friendId: currentChat?._id,   
+            message: message,   
+            isSender: true,             
+            status: 'sent', 
+            msgTime:formattedTime(now)
+        });
 
         const messageFormData = new FormData()
         if (currentChat?.isGroupChat) {
@@ -72,27 +97,44 @@ export const MessageInputBox = () => {
             messageFormData.append('reciverId', currentChat._id);
         }
 
-
-        const encryptedMessage = encryptMessage(inputMessage, aesKey);
+        const encryptedMessage = encryptMessage(message, aesKey);
 
         const encryptedAesKeysMap = {};
         for (const member of members) {
-            let reciverPublicKey = currentChat.isGroupChat ? member?.publicKey : currentChat.publicKey
+            let reciverPublicKey = currentChat?.isGroupChat ? member?.publicKey : currentChat.publicKey
             const encryptedAESKey = encryptAESKey(aesKey, reciverPublicKey);
             encryptedAesKeysMap[member._id] = encryptedAESKey;
         }
 
         const encrypedAESKeyForSender = encryptAESKey(aesKey, user.publicKey);
         encryptedAesKeysMap[user._id] = encrypedAESKeyForSender;
-        
+
         messageFormData.append('encryptedMessage', encryptedMessage);
         messageFormData.append('encryptedAESKeys', JSON.stringify(encryptedAesKeysMap));
+        messageFormData.append('createdAt', now);
+        messageFormData.append('isForGroup', !!currentChat?.isGroupChat);
+
 
         if (inputImage) {
             messageFormData.append('image', inputImage)
         }
 
-        sendMessageMutation.mutate(messageFormData)
+        setInputImage(null)
+        setInputMessage('')
+
+        sendMessageMutation.mutate(messageFormData, {
+            onSuccess: (data) => {
+                let messageId = data.createdMsgId;
+                setMessages(prevMessages => prevMessages.map(msg => {
+                    let image = msg?.image ? data?.sentImage : null
+                    return msg._id === tempMessageId ? { ...msg, _id: messageId, image, status: 'sent' } : msg
+                }
+                ));
+
+                URL.revokeObjectURL(previewInputImage)
+                setPreviewInputImage(null)
+            }
+        })
     }
 
     const handleTyping = (e) => {
@@ -125,19 +167,19 @@ export const MessageInputBox = () => {
         setInputMessage(prev => prev + e.emoji)
     }
 
+
     const handleInputFile = (e) => {
-        const file = e.target.files[0]
-        if (file) {
-            const UrlObj = URL.createObjectURL(file)
-            if (previewInputImage) {
-                URL.revokeObjectURL(previewInputImage)
-                setInputImage(null)
-                setPreviewInputImage(null)
-            }
-            setPreviewInputImage(UrlObj)
-            setInputImage(file)
-        }
-    }
+        const file = e.target.files[0];
+        if (!file) return;
+
+        if (previewInputImage) URL.revokeObjectURL(previewInputImage);
+        const newPreviewUrl = URL.createObjectURL(file);
+
+        setPreviewInputImage(newPreviewUrl);
+        setInputImage(file);
+
+        e.target.value = null;
+    };
 
     const cancleInputFile = () => {
         if (previewInputImage) {
@@ -158,13 +200,13 @@ export const MessageInputBox = () => {
     }, [])
 
     return (
-        <div className='sticky bottom-0 left-0 w-full border-gray-300 border-t dark:bg-gray-800 bg-gray-100  p-2'>
+        <div className='sticky bottom-0 left-0 w-full border-gray-300 border-t dark:bg-gray-800 bg-gray-100 p-0.5 md:p-2'>
             <div className='w-full h-16 flex items-center  p-2 rounded-lg'>
                 <div className={`absolute bottom-20 transition ease-in-out duration-300 left-5 ${isEmojiOpen ? "block" : "hidden"}`}>
                     <EmojiPicker open={true} lazyLoadEmojis={true} emojiStyle='apple' className='z-50' onEmojiClick={handleEmojiClick} height={400} />
                 </div>
 
-                <div className='flex-1 flex items-center px-2 h-full  dark:bg-gray-500 dark:text-gray-100 bg-white rounded-lg outline-orange-300'>
+                <div className='flex-1 flex items-center pl-2 h-full  dark:bg-gray-500 dark:text-gray-100 bg-white rounded-lg outline-orange-300'>
 
 
                     <div className='flex justify-center border-r-2 px-1 pr-3 gap-2 items-center'>
@@ -186,7 +228,7 @@ export const MessageInputBox = () => {
                     }
 
 
-                    <input type="text" className='h-full w-full text-lg py-2 px-2 outline-none dark:bg-gray-500 dark:text-gray-100 bg-white rounded-lg outline-orange-300' value={inputMessage}
+                    <input type="text" className='h-full w-full text-xl py-2 px-2 outline-none dark:bg-gray-500 dark:text-gray-100 bg-white rounded-lg outline-orange-300' value={inputMessage}
                         onChange={handleTyping}
                         onKeyDown={(e) => {
                             if (e.key === 'Enter') {
@@ -196,13 +238,9 @@ export const MessageInputBox = () => {
                         placeholder='Type a message...' />
 
                 </div>
-                <div className='bg-orange-400 cursor-pointer text-white px-4 md:px-6 mx-2 rounded flex items-center justify-center h-full gap-2'>
-                    <p onClick={() => {
-                        handleSendMessage(inputMessage)
-                    }} className='text-sm font-medium leading-none'>{sendMessageMutation.isPending ? "Sending" + loadingDots : "Send"}</p>
-                    {/* <IoSend size={23} /> */}
-                    <LuSend />
-                </div>
+                <button className='bg-orange-400 cursor-pointer text-white px-4 md:px-5 mx-2 rounded flex items-center justify-center h-full gap-2'>
+                    <LuSend className='text-md'/>
+                </button>
             </div>
         </div>
     )

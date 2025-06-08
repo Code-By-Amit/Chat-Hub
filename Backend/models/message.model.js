@@ -24,6 +24,18 @@ const messageSchama = new mongoose.Schema({
     },
     image: {
         type: String,
+    },
+    status: {
+        type: String,
+        enum: ['sent', 'read'],
+        default: 'sent'
+    },
+    readBy: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User'
+    }],
+    isForGroup:{
+        type:Boolean
     }
 }, { timestamps: true })
 

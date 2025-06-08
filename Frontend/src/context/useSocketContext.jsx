@@ -5,6 +5,9 @@ import { msgNotification } from "../utils/msgNotificationToast";
 import { decryptAESKey } from "../Encryption/rsa";
 import { decryptMessage } from "../Encryption/aes";
 import { useChatContext } from "./chatContext";
+import { updateFriendLastMessage } from "../utils/updateLastMessage";
+import { useQueryClient } from "@tanstack/react-query";
+import { formattedTime } from "../utils/formatedDate";
 
 const SocketContext = createContext()
 
@@ -15,11 +18,11 @@ export const SocketContextProvider = ({ children }) => {
     const { user, privateKey } = authUser()
     const Backend_Url = import.meta.env.VITE_BACKEND_URL;
     const { currentChat, setCurrentChat } = useChatContext();
-
+    const queryClient = useQueryClient();
     useEffect(() => {
         if (user) {
             const newSocket = io(Backend_Url, {
-                query: {
+                auth: {
                     userId: user?._id
                 }
             })
@@ -68,16 +71,28 @@ export const SocketContextProvider = ({ children }) => {
 
             const { fullName, username, avatar, _id, publicKey } = newMessage.sender;
             const handleReplyClick = () => {
-                if(currentChat.isGroupChat){
+                if (currentChat.isGroupChat) {
                     setCurrentChat({ _id, fullName, username, avatar, publicKey })
-                }else{
-                    setCurrentChat(newMessage.chatId)
                 }
             }
-            console.log("new Message",newMessage)
-            if(newMessage?.chatId?._id != currentChat?._id && user?._id !== newMessage?.sender?._id && newMessage?.sender?._id !== currentChat._id ){
-                const isGroupChat = currentChat?.isGroupChat
+
+            if (newMessage?.chatId?._id != currentChat?._id && user?._id !== newMessage?.sender?._id && newMessage?.sender?._id !== currentChat?._id || currentChat == null) {
+                const isGroupChat = newMessage?.isForGroup
                 msgNotification(newMessage, message, handleReplyClick, isGroupChat)
+            } else {
+                socket.emit('message-read', { messageId: newMessage?._id, senderId: newMessage?.sender?._id })
+            }
+
+            const msgTime = formattedTime(newMessage.createdAt)
+            if(!newMessage?.isForGroup){
+                updateFriendLastMessage({
+                    queryClient,
+                    friendId: newMessage?.sender?._id,
+                    message: message ? message : "image",
+                    isSender: false,
+                    status: 'sent',
+                    msgTime
+                });
             }
         }
 
@@ -85,7 +100,7 @@ export const SocketContextProvider = ({ children }) => {
         return () => {
             socket.off("newMessage", handleNewMessage);
         }
-    }, [socket,currentChat])
+    }, [socket, currentChat])
 
     return <SocketContext.Provider value={{ socket, onlineUsers, typingStatus }}  >
         {children}

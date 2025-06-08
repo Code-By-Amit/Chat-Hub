@@ -8,7 +8,7 @@ async function updateUser(req, res) {
         const userId = req.userId;
 
         const user = await User.findById(userId)
-        const isUsernameExists = await User.findOne({ username })
+        const isUsernameExists = await User.findOne({ username }).select('_id').lean()
         if (isUsernameExists) {
             return res.status(400).json({ message: "Username Already Exists" })
         }
@@ -48,7 +48,21 @@ async function updateUser(req, res) {
 async function getUserFriends(req, res) {
     try {
         const userId = req.userId;
-        const friends = await User.findById(userId).populate({ path: 'friends', select: "fullName avatar bio username publicKey" }).select('friends')
+        const user = await User.findById(userId).populate({ path: 'friends', select: "fullName avatar bio username publicKey" }).select('friends').lean()
+
+        let friends = user.friends
+        const friendsWithLastMessages = await Promise.all(friends.map(async (friend) => {
+            const chat = await Chat.findOne({
+                isGroupChat: false,
+                members: { $all: [friend._id, userId], $size: 2 }
+            }).populate('lastMessage').lean()
+            return {    
+                ...friend,
+                lastMessage: chat?.lastMessage || null
+            };
+        }));
+
+         friends = friendsWithLastMessages
         res.status(200).json(friends)
     } catch (error) {
         console.log('Error in getUserFriends Handeler ', error.message)
@@ -58,7 +72,7 @@ async function getUserFriends(req, res) {
 
 async function searchUserByName(req, res) {
     try {
-        const { search, limit=5 } = req.query;
+        const { search, limit = 5 } = req.query;
         const users = await User.find({ fullName: RegExp(search, 'i') }).limit(Number(limit)).lean()
         res.status(200).json(users)
     } catch (error) {
@@ -67,19 +81,19 @@ async function searchUserByName(req, res) {
     }
 }
 
-async function unfriendFriend(req,res){
+async function unfriendFriend(req, res) {
     try {
-        const {friendId} = req.params;
+        const { friendId } = req.params;
         const userId = req.userId;
-        
-        let conversationChat = await Chat.findOneAndDelete({members:{$in:[friendId,userId]}});
-        if(!conversationChat){
-            return res.status(400).json({message:"Chat Not Found"})
+
+        let conversationChat = await Chat.findOneAndDelete({ members: { $in: [friendId, userId] } });
+        if (!conversationChat) {
+            return res.status(400).json({ message: "Chat Not Found" })
         }
 
-        await Chat.deleteMany({chatId:conversationChat.chatId})
-        
-        res.status(200).json({message:"Unfriended successfully"})
+        await Chat.deleteMany({ chatId: conversationChat.chatId })
+
+        res.status(200).json({ message: "Unfriended successfully" })
 
     } catch (error) {
         console.log('Error in searchUserByName Handeler ', error.message)
@@ -87,4 +101,4 @@ async function unfriendFriend(req,res){
     }
 }
 
-module.exports = { updateUser, getUserFriends, searchUserByName ,unfriendFriend}
+module.exports = { updateUser, getUserFriends, searchUserByName, unfriendFriend }

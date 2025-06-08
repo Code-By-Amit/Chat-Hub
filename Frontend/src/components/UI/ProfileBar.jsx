@@ -2,13 +2,22 @@ import React, { use, useState } from 'react'
 import { MdOutlineKeyboardArrowLeft } from "react-icons/md";
 import { useChatContext } from '../../context/chatContext';
 import { GrContactInfo } from "react-icons/gr";
+import { useSocketContext } from '../../context/useSocketContext';
 
 export const ProfileBar = ({ avatar, name, isOnline, isTyping, setIsChatInfoModalOpen }) => {
     const { currentChat, setCurrentChat } = useChatContext();
+    const {onlineUsers} = useSocketContext()
+    let noOfMemberOnline = 0
+    if(currentChat.isGroupChat){
+        currentChat.members.forEach(member=>{
+           let no = onlineUsers.includes(member._id)
+           if(no) noOfMemberOnline += 1;
+        })
+    }
     return (
         <>
 
-            <div className="card flex justify-between items-center pr-5 md:pr-13 p-3 pt-5 top-0 sticky dark:text-gray-100 dark:bg-gray-800 border-gray-300 border-b w-full h-fit rounded bg-gray-50">
+            <div className="card flex justify-between items-center z-40 pr-5 md:pr-13 p-3 pt-5 top-0 sticky dark:text-gray-100 dark:bg-gray-800 border-gray-300 border-b w-full h-fit rounded bg-gray-50">
 
                 <div className='leading-3 flex gap-4'>
                     <div className='flex items-center gap-2'>
@@ -28,10 +37,10 @@ export const ProfileBar = ({ avatar, name, isOnline, isTyping, setIsChatInfoModa
                                         <p className='align-middle text-xs font-mono text-green-400'> typing...</p>
                                     </>
                                 ) :
-                                    isOnline ? (
+                                    (isOnline || currentChat?.isGroupChat) ? (
                                         <>
                                             <div className='w-2 h-2 ring-white bg-green-400 rounded-full bottom-0.5 right-0'></div>
-                                            <p className='align-middle text-xs dark:text-gray-100'> online</p>
+                                            <p className='align-middle text-xs dark:text-gray-100'>{currentChat?.isGroupChat && noOfMemberOnline} online</p>
                                         </>
                                     ) : null
                             }

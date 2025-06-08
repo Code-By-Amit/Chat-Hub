@@ -2,6 +2,7 @@ const Chat = require("../models/chat.model");
 const User = require("../models/user.model");
 const { uploadOnCloudinary } = require("../utils/uploadOnCloudinary");
 const Invitation = require("../models/invitation.model");
+const GroupMembership = require('../models/groupMembership.model')
 
 async function createGroup(req, res) {
     try {
@@ -12,7 +13,7 @@ async function createGroup(req, res) {
             groupAvatar = await uploadOnCloudinary(req.file);
         }
 
-        const newGroup = Chat.create({
+        const newGroup = await Chat.create({
             groupName,
             groupAvatar,
             groupAdmin: userId,
@@ -20,11 +21,17 @@ async function createGroup(req, res) {
             isGroupChat: true,
             members: [userId]
         })
-        await User.findByIdAndUpdate(userId, { $addToSet: { groups: newGroup._id } }).lean()
+        await User.findByIdAndUpdate(userId, { $addToSet: { groups: newGroup._id } })
 
         if (!newGroup) {
             return res.status(400).json({ message: "Failed to Create a Group" })
         }
+
+        await GroupMembership.create({
+            userId,
+            groupId: newGroup._id,
+            joinedAt: new Date()
+        });
 
         res.status(200).json({ message: "Group Created Sucssfully", createdGroup: newGroup })
 
@@ -75,10 +82,10 @@ async function invitetoGroup(req, res) {
         if (!user) {
             return res.status(400).json({ message: "Error: user not found" })
         }
-      
+
 
         if (!group?.isMembersCanInvite && group?.groupAdmin?.toString() !== req.userId) {
-           return res.status(400).json({ message: "Only Admin Can invite" })
+            return res.status(400).json({ message: "Only Admin Can invite" })
         }
 
         const [isAlreadyaMember, alreadyInvitaionSent] = await Promise.all([
@@ -124,8 +131,6 @@ async function acceptGroupInvitation(req, res) {
             User.findById(req.userId).select('_id'),
             Invitation.findById(invitationId).lean()
         ])
-        console.log(invitationId)
-        console.log(invitation)
 
         if (!user) {
             return res.status(400).json({ message: "User not found" });
@@ -150,6 +155,12 @@ async function acceptGroupInvitation(req, res) {
         }
 
         await Invitation.deleteOne({ _id: invitationId });
+
+        await GroupMembership.create({
+            userId: req.userId,
+            groupId: invitation?.group,
+            joinedAt: new Date()
+        });
         res.status(200).json({ message: "Group Invitation Accepted" });
 
     } catch (error) {

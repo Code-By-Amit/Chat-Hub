@@ -12,8 +12,6 @@ import { getUserGroupApi } from '../../apis/chatApis';
 import { GroupChatCard } from '../../components/UI/GroupChatCard';
 
 
-
-
 export const FriendAndGroupListPannel = () => {
     const [active, setActive] = useState('Personals')
     const [token, setToken] = useState(localStorage.getItem('token') || null)
@@ -41,7 +39,7 @@ export const FriendAndGroupListPannel = () => {
                         <SlidingButton setActive={setActive} active={active} buttons={["Personals", "Groups"]} />
                     <div className='w-full border border-gray-200 my-4'></div>
 
-                    <div className="profileCard flex  flex-col gap-2 p-2 max-h-100 md:max-h-144 overflow-y-auto custom-scrollbar ">
+                    <div className="profileCard flex  flex-col gap-2 p-2 max-h-100 md:max-h-144">
                         {/* <ChatUserCard avatar="https://avatar.iran.liara.run/public/boy?username=amit" name="Amit Saini" isOnline /> */}
                         {
                             active === "Personals" ?

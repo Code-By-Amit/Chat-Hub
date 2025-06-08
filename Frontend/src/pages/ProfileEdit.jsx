@@ -115,7 +115,7 @@ export const ProfileEdit = () => {
                 <IoArrowBackOutline size={30} />
                 </div>
             <div className=''>
-                <h1 className='text-2xl text-gray-800 font-semibold dark:text-gray-50 text-center mb-3'>Edit Profile</h1>
+                <h1 className='text-2xl text-gray-800 font-semibold dark:text-gray-50 text-center mb-3'>Update Profile</h1>
                 <div className='bg-white p-5 flex flex-col items-center md:flex-row dark:bg-gray-700 '>
                     <div className='m-4 w-40 flex justify-start items-center flex-col'>
                         <img className='h-25 w-25 rounded-full mb-2 shadow-2xl' src={previewAvatar ? previewAvatar : avatar} alt="Profile" />
@@ -157,7 +157,7 @@ export const ProfileEdit = () => {
                             </div>
 
 
-                            <button className=' w-full mx-auto block bg-orange-400 cursor-pointer hover:opacity-85 text-white font-semibold py-1 mt-5 rounded'>Edit</button>
+                            <button className=' w-full mx-auto block bg-orange-400 cursor-pointer hover:opacity-85 text-white font-semibold py-1 mt-5 rounded'>Update</button>
                         </form>
                     </div>
                 </div>

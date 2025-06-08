@@ -4,16 +4,18 @@ import tailwindcss from '@tailwindcss/vite'
 import { VitePWA } from 'vite-plugin-pwa'
 
 export default defineConfig({
+  base: '/',
   plugins: [
     tailwindcss(),
     react(),
+
     VitePWA({
       registerType: 'autoUpdate',
       includeAssets: ['favicon.svg', 'robots.txt', 'apple-touch-icon.png'],
       strategies: 'injectManifest',
       srcDir: "src",
       filename: "my-sw.js",
-      injectManifest: { rollupFormat: 'iife',injectionPoint:undefined,globPatterns: ['**/*.{js,css,html,ico,png,svg}'] ,globIgnores: ['my-sw.js'],},
+      injectManifest: { rollupFormat: 'es' },
       manifest: {
         name: 'ChatHub',
         short_name: 'ChatHub',
@@ -36,12 +38,12 @@ export default defineConfig({
       },
     })
   ],
-  build:{rollupOptions:{external:[ 'workbox-precaching']}},
-    server: {
-      port: 5173,
-      host: '0.0.0.0'
-    },
-  })
+  build: { rollupOptions: { external: ['workbox-precaching'] } },
+  server: {
+    port: 5173,
+    host: '0.0.0.0',
+  }
+})
 
 // optimizeDeps: {
 //     include: ['react/jsx-runtime'],

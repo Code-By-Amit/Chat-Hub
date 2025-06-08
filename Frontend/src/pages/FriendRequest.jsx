@@ -158,6 +158,7 @@ export const FriendRequest = () => {
                     acceptRequestMutation={acceptRequestMutation}
                     avatar={request?.isForGroup ? request?.group?.groupAvatar: request?.from?.avatar}
                     invitedBy={request?.from?.fullName}
+                    isForGroup={request?.isForGroup}
                     card="Incomming"
                   />
                 ))
@@ -193,7 +194,7 @@ export const FriendRequest = () => {
   )
 }
 
-const ProfileBars = ({ id, name, avatar, card, acceptRequestMutation, declineRequestMutation, sendFriendRequestMutation, invitedBy }) => {
+const ProfileBars = ({ id, name, avatar, card, acceptRequestMutation, declineRequestMutation, sendFriendRequestMutation, invitedBy ,isForGroup}) => {
   return (
     <div key={id} className="card bg-gray-50 dark:bg-gray-600 rounded-md p-4 flex items-center justify-between">
       <div className="flex gap-4">
@@ -202,14 +203,15 @@ const ProfileBars = ({ id, name, avatar, card, acceptRequestMutation, declineReq
         </div>
         <div className='leading-5'>
           <h5 className="font-semibold dark:text-gray-50">{name}</h5>
-          {invitedBy && <span className='text-sm text-gray-800 dark:text-gray-200'>- Invited by {invitedBy}</span> }
+          { isForGroup && <span className='text-sm text-gray-800 dark:text-gray-200'>- Invited by {invitedBy}</span>}
+          {(card === "Incomming" && !isForGroup) &&  <span className='text-sm text-gray-800 dark:text-gray-200'>- sent you a friend request</span>}
         </div>
       </div>
       <div className="flex gap-2 items-center">
         {card === "Incomming" ? (
           <>
             <button onClick={() => {
-              acceptRequestMutation.mutate({reqId:id,isForGroup:!!invitedBy})
+              acceptRequestMutation.mutate({reqId:id,isForGroup})
             }} className="px-4 py-1 border-none outline-none bg-orange-400 text-white rounded-2xl cursor-pointer transition ease-in-out duration-300 hover:scale-105 hover:shadow-xl">
               Accept
             </button>
