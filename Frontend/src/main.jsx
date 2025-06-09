@@ -1,28 +1,30 @@
-  import { StrictMode } from 'react'
-  import { createRoot } from 'react-dom/client'
-  import App from './App.jsx'
-  import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-  import { ReactQueryDevtools } from "@tanstack/react-query-devtools"
-  import { UserContexProvider } from './context/authUser.jsx'
-  import { Toaster } from 'react-hot-toast'
-  import { SocketContextProvider } from './context/useSocketContext.jsx'
-  import './index.css'
-  import { ChatProvider } from './context/chatContext.jsx'
-  import { registerSW } from 'virtual:pwa-register'
+import { StrictMode } from 'react'
+import { createRoot } from 'react-dom/client'
+import App from './App.jsx'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import { ReactQueryDevtools } from "@tanstack/react-query-devtools"
+import { UserContexProvider } from './context/authUser.jsx'
+import { Toaster } from 'react-hot-toast'
+import { SocketContextProvider } from './context/useSocketContext.jsx'
+import './index.css'
+import { ChatProvider } from './context/chatContext.jsx'
+import { registerSW } from 'virtual:pwa-register'
+import { BrowserRouter } from 'react-router-dom'
 
-  registerSW({
-    onRegistered(registration) {
-      console.log('Service worker registered:', registration)
-    },
-    onRegisterError(error) {
-      console.error('SW registration failed:', error)
-    }
-  })
+registerSW({
+  onRegistered(registration) {
+    console.log('Service worker registered:', registration)
+  },
+  onRegisterError(error) {
+    console.error('SW registration failed:', error)
+  }
+})
 
-  const queryClient = new QueryClient()
+const queryClient = new QueryClient()
 
-  createRoot(document.getElementById('root')).render(
-    <StrictMode>
+createRoot(document.getElementById('root')).render(
+  // <StrictMode>
+    <BrowserRouter>
       <QueryClientProvider client={queryClient}>
         <UserContexProvider>
           <ChatProvider>
@@ -45,5 +47,6 @@
           </ChatProvider>
         </UserContexProvider>
       </QueryClientProvider>
-    </StrictMode>,
-  )
+    </BrowserRouter> 
+  // </StrictMode>, 
+)

@@ -8,7 +8,7 @@ import { formattedTime } from "../../utils/formatedDate";
 
 
 export const ChatUserCard = ({ friend, isOnline, isTyping }) => {
-  const { setCurrentChat } = useChatContext();
+  const { currentChat,setCurrentChat } = useChatContext();
   const { user, privateKey } = authUser();
   let { encryptedMessage, encryptedAESKeys, message, isSender = false, image, msgTime, createdAt, sender, status } = friend?.lastMessage || {};
   const queryClient = useQueryClient()
@@ -26,10 +26,11 @@ export const ChatUserCard = ({ friend, isOnline, isTyping }) => {
   }
 
   const handleOnclick = () => {
+    if(currentChat?._id == friend?._id ) return;   
     updateFriendLastMessage({
       queryClient,
       friendId: friend._id,
-      isSender: false,
+      isSender,
       status: 'read',
       message,
       msgTime

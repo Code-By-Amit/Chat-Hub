@@ -52,11 +52,11 @@ io.on('connection', (socket) => {
     socket.on('messageRead', async ({ chatId, isGroupChat, messageIds }) => {
 
         const messages = await Message.find({ _id: { $in: messageIds } });
-
+        
         const updateOps = messages.map(async (msg) => {
             const alreadyRead = msg.readBy.includes(userId);
-
             if (!alreadyRead && msg.sender.toString() !== userId.toString()) {
+                
                 msg.readBy.push(userId);
                 let chat
                 if (isGroupChat) {
@@ -66,7 +66,10 @@ io.on('connection', (socket) => {
                         isGroupChat: false,
                         members: { $all: [userId, chatId], $size: 2 }
                     })
-                }   
+                }      
+                console.log('chat',chat)
+                console.log(msg?.readBy?.length)
+                console.log(chat?.members?.length)
                 
                 if (msg?.readBy?.length === chat?.members?.length) {
                     msg.status = 'read';

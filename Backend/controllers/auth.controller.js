@@ -5,7 +5,7 @@ async function signupUser(req, res) {
     try {
         const { fullName, username, password ,gender, publicKey ,encryptedPrivateKey } = req.body;
 
-        let user = await User.findOne({ username })
+        let user = await User.findOne({ username }).lean()
         if (user) {
             return res.status(200).json({ message: "username already exists" })
         }
@@ -37,7 +37,7 @@ async function loginUser(req, res) {
     try {
         const { username, password } = req.body;
 
-        const user = await User.findOne({ username })
+        const user = await User.findOne({ username }).select('_id').lean()
         if (!user) {
             return res.status(404).json({ message: "User not Found" })
         }

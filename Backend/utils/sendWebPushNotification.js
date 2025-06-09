@@ -12,11 +12,16 @@ async function sendWebPushNotification(userId, notificationPayload) {
 
     for (const sub of subscriptions) {
         const pushSubscription = {
-            endpoint: sub.endpoint, 
+            endpoint: sub.endpoint,
             keys: { p256dh: sub.keys.p256dh, auth: sub.keys.auth }
         };
         try {
-            await webpush.sendNotification(pushSubscription, JSON.stringify(notificationPayload));
+            await webpush.sendNotification(pushSubscription, JSON.stringify(notificationPayload)).catch(async err => {
+                if (err.statusCode === 410 || err.statusCode === 404) {
+                    // Subscription is dead — delete it from DB
+                    await PushSubscription.deleteOne({ endpoint: sub.endpoint })
+                }
+            });;
         } catch (error) {
             console.error('Push failed, maybe subscription is invalid:', error.message);
         }

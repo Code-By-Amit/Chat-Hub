@@ -71,8 +71,8 @@ async function invitetoGroup(req, res) {
         }
 
         const [user, group] = await Promise.all([
-            User.findById(userId),
-            Chat.findById(groupId)
+            User.findById(userId).lean(),
+            Chat.findById(groupId).lean()
         ])
 
         if (!group) {

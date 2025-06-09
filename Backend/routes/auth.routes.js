@@ -11,7 +11,7 @@ router.post('/login', validate(loginSchema), loginUser)
 router.post('/logout', logOutUser)
 router.get('/me', isAuthenticated, async (req, res) => {
     try {
-        const user = await User.findById(req.userId).select('-password -encryptedPrivateKey')
+        const user = await User.findById(req.userId).select('-password -encryptedPrivateKey').lean()
         if (!user) {
             return res.status(400).json({ message: "User Not Found" })
         }
@@ -30,7 +30,6 @@ router.post('/setkeys',isAuthenticated,async (req,res)=>{
     user.publicKey = publicKey;
     user.encryptedPrivateKey = encryptedPrivateKey;
     await user.save();
-    console.log(user);
     res.status(200).json({message: "Set Keys Sucssfully"})
 })
 

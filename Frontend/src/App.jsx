@@ -1,5 +1,5 @@
 import './App.css'
-import { BrowserRouter, Route, Routes } from 'react-router-dom'
+import { Route, Routes } from 'react-router-dom'
 import { Signup } from './pages/Signup'
 import { MainLayout } from './components/Layout/MainLayout'
 import { ChatPage } from './pages/ChatPage/ChatPage'
@@ -27,9 +27,6 @@ function App() {
   const subscribeMutation = useMutation({
     mutationKey:['messagePushSubscription'],
     mutationFn:(subscription) => messageSubscriptionApi(subscription,token),
-    onSuccess:(data)=>{
-        console.log("Data Recived from backednd: ",data)
-    }
   })
 
   async function subscribeToPush() {
@@ -52,11 +49,7 @@ function App() {
   if ('Notification' in window && navigator.serviceWorker) {
     Notification.requestPermission().then(permission => {
       if (permission === 'granted') {
-        console.log('Notification permission granted.');
-        // Now you can subscribe for push notifications here
         subscribeToPush();
-      } else {
-        console.log('Notification permission denied.');
       }
     });
   }
@@ -64,7 +57,6 @@ function App() {
 
 
   return (
-    <BrowserRouter>
       <Routes>
         <Route path='/' element={<Login />} />
         <Route path='/signup' element={<Signup />} />
@@ -75,7 +67,6 @@ function App() {
           <Route path='profile/edit' element={<ProfileEdit />} />
         </Route>
       </Routes>
-    </BrowserRouter>
   )
 }
 

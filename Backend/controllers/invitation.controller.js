@@ -7,7 +7,7 @@ async function sendFriendRequest(req, res) {
         const { toUserId } = req.body;
         const fromUserId = req.userId
 
-        const user = await User.findById(toUserId);
+        const user = await User.findById(toUserId).select("friends").lean();
 
         if (!user) {
             return res.status(404).json({ message: "User not found" });

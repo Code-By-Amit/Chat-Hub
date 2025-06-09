@@ -238,7 +238,7 @@ export const MessageInputBox = ({ setMessages }) => {
                         placeholder='Type a message...' />
 
                 </div>
-                <button className='bg-orange-400 cursor-pointer text-white px-4 md:px-5 mx-2 rounded flex items-center justify-center h-full gap-2'>
+                <button onClick={()=> handleSendMessage(inputMessage)} className='bg-orange-400 cursor-pointer text-white px-4 md:px-5 mx-2 rounded flex items-center justify-center h-full gap-2'>
                     <LuSend className='text-md'/>
                 </button>
             </div>
