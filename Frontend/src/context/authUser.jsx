@@ -17,7 +17,6 @@ export const UserContexProvider = ({ children }) => {
     useEffect(() => {
         const loadKey = async () => {
             const key = await getStoredPrivateKey();
-            console.log("Key: ", key)
             if (key) setPrivateKey(key)
             else {
                 if (token) {

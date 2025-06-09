@@ -11,14 +11,7 @@ import { ChatProvider } from './context/chatContext.jsx'
 import { registerSW } from 'virtual:pwa-register'
 import { BrowserRouter } from 'react-router-dom'
 
-registerSW({
-  onRegistered(registration) {
-    console.log('Service worker registered:', registration)
-  },
-  onRegisterError(error) {
-    console.error('SW registration failed:', error)
-  }
-})
+registerSW()
 
 const queryClient = new QueryClient()
 
