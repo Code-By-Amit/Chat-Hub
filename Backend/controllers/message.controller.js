@@ -7,7 +7,7 @@ const { uploadOnCloudinary } = require("../utils/uploadOnCloudinary");
 
 async function sendMessage(req, res) {
     try {
-        let { encryptedMessage, chatId, reciverId,createdAt,isForGroup, encryptedAESKeys } = req.body;
+        let { encryptedMessage, chatId, reciverId, createdAt, isForGroup, encryptedAESKeys } = req.body;
         const userId = req.userId;
 
         let chat
@@ -42,9 +42,9 @@ async function sendMessage(req, res) {
             status: "sent",
             createdAt,
             isForGroup,
-            readBy:[userId]
+            readBy: [userId]
         })
-        
+
         chat.lastMessage = newMessage._id;
         await chat.save();
 
@@ -53,8 +53,9 @@ async function sendMessage(req, res) {
 
         for (const member of chat.members) {
 
-            if (member.toString() == userId.toString()) continue;
-            let isInChat = chat?.isGroupChat ? isUserInChat(userId, chat._id) : isUserInChat(userId, member)
+            if (member.toString() == userId.toString()) continue; 
+            const valueToCheck = chat.isGroupChat ? chat._id : userId;
+            let isInChat = isUserInChat(member, valueToCheck)
             if (!isInChat) {
                 await sendWebPushNotification(member, {
                     title: newMessage.sender.fullName,
@@ -66,7 +67,6 @@ async function sendMessage(req, res) {
         }
         const createdMsgId = newMessage._id
         const sentImage = newMessage?.image || null
-
 
         const memberSocketIds = await Promise.all(
             chat.members.filter(mId => mId != userId).map(member => getReciverSocketId(member)) // Then map and resolve promises
@@ -108,15 +108,15 @@ async function getMessage(req, res) {
                 })
             }
         }
-         let messageQuery = { chatId: chat._id };
-        if(chatId){
-            const membership = await GroupMembership.findOne({ userId:fromUserId, groupId:chatId }).select('joinedAt').lean();
+        let messageQuery = { chatId: chat._id };
+        if (chatId) {
+            const membership = await GroupMembership.findOne({ userId: fromUserId, groupId: chatId }).select('joinedAt').lean();
             if (!membership) {
                 return res.status(403).json({ message: 'You are not a group member' });
             }
             messageQuery.createdAt = { $gte: membership.joinedAt };
         }
-            // const messages = await Message.find({ chatId: chat._id }).skip((page - 1) * Number(limit)).limit(Number(limit)).populate('sender', 'avatar fullName username')
+        // const messages = await Message.find({ chatId: chat._id }).skip((page - 1) * Number(limit)).limit(Number(limit)).populate('sender', 'avatar fullName username')
         const messages = await Message.find(messageQuery).sort({ createdAt: 1 }).populate('sender', 'avatar fullName username').lean()
 
         res.status(200).json({ messages })

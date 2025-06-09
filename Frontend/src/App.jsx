@@ -25,48 +25,47 @@ function App() {
   }
 
   const subscribeMutation = useMutation({
-    mutationKey:['messagePushSubscription'],
-    mutationFn:(subscription) => messageSubscriptionApi(subscription,token),
+    mutationKey: ['messagePushSubscription'],
+    mutationFn: (subscription) => messageSubscriptionApi(subscription, token),
   })
 
   async function subscribeToPush() {
     if ('serviceWorker' in navigator) {
       const registration = await navigator.serviceWorker.ready;
-
       const subscription = await registration.pushManager.subscribe({
         userVisibleOnly: true,
         applicationServerKey: urlBase64ToUint8Array(publicKey)
       });
 
       // Send subscription to your backend
-      if(token){
+      if (token) {
         subscribeMutation.mutate(subscription)
       }
     }
   }
 
   useEffect(() => {
-  if ('Notification' in window && navigator.serviceWorker) {
-    Notification.requestPermission().then(permission => {
-      if (permission === 'granted') {
-        subscribeToPush();
-      }
-    });
-  }
-}, []);
+    if ('Notification' in window && navigator.serviceWorker) {
+      Notification.requestPermission().then(permission => {
+        if (permission === 'granted') {
+          subscribeToPush();
+        }
+      });
+    }
+  }, []);
 
 
   return (
-      <Routes>
-        <Route path='/' element={<Login />} />
-        <Route path='/signup' element={<Signup />} />
-        <Route path='/chat' element={<ProtectedRoute><MainLayout /></ProtectedRoute>}>
-          <Route path='' element={<ChatPage />} />
-          <Route path='friendrequest' element={<FriendRequest />} />
-          <Route path='profile' element={<ProfilePage />} />
-          <Route path='profile/edit' element={<ProfileEdit />} />
-        </Route>
-      </Routes>
+    <Routes>
+      <Route path='/' element={<Login />} />
+      <Route path='/signup' element={<Signup />} />
+      <Route path='/chat' element={<ProtectedRoute><MainLayout /></ProtectedRoute>}>
+        <Route path='' element={<ChatPage />} />
+        <Route path='friendrequest' element={<FriendRequest />} />
+        <Route path='profile' element={<ProfilePage />} />
+        <Route path='profile/edit' element={<ProfileEdit />} />
+      </Route>
+    </Routes>
   )
 }
 

@@ -42,7 +42,7 @@ async function loginUser(req, res) {
             return res.status(404).json({ message: "User not Found" })
         }
         if (!(await user.comparePassword(password))) {
-            return res.status(401).json({ message: "Invalid Credenitals" })
+            return res.status(401).json({ message: "Invalid Credentials" })
         }
 
         const token = generateTokenAndSetCookie(user._id, res)

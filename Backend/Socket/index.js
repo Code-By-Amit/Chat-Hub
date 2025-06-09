@@ -67,9 +67,6 @@ io.on('connection', (socket) => {
                         members: { $all: [userId, chatId], $size: 2 }
                     })
                 }      
-                console.log('chat',chat)
-                console.log(msg?.readBy?.length)
-                console.log(chat?.members?.length)
                 
                 if (msg?.readBy?.length === chat?.members?.length) {
                     msg.status = 'read';
