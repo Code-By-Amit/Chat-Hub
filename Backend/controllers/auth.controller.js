@@ -37,7 +37,7 @@ async function loginUser(req, res) {
     try {
         const { username, password } = req.body;
 
-        const user = await User.findOne({ username }).select('_id')
+        const user = await User.findOne({ username }).select('_id password encryptedPrivateKey fullName')
         if (!user) {
             return res.status(404).json({ message: "User not Found" })
         }
