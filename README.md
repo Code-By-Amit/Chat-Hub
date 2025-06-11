@@ -100,5 +100,5 @@ Fork the repo, create a new branch, and submit a pull request with your awesome 
 ## 💖 Thank You!
 Thank you for checking out ChatHub.
 
-We hope you enjoy using it as much as i enjoyed building it.
+I hope you enjoy using it as much as i enjoyed building it.
 Happy chatting! 🚀
