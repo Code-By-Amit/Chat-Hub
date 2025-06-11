@@ -41,19 +41,19 @@ Welcome to **ChatHub** – a sleek, private, and secure chat application built f
 git clone https://github.com/Code-By-Amit/Chat-Hub.git
 ```
 
-2. Navigate to Client and Backend Folder and Install dependencies:
+2. Navigate to Frontend and Backend Folder and Install dependencies:
 ```
-# Client
-cd client 
+# Frontend
+cd Frontend 
 npm install
 
 # Backend
-cd backend
+cd Backend
 npm install
 ```
 
 3. Set up environment variables
-   - in `backend/.env`:
+   - in `Backend/.env`:
 ```javascript
 PORT=
 JWT_SECRET=
