@@ -146,7 +146,7 @@ export const Signup = () => {
                             </div>
                             <button className='w-48 mx-auto block bg-orange-400 cursor-pointer hover:opacity-85 text-white font-semibold py-1 my-5  rounded-2xl'>Sign Up</button>
                         </form>
-                        <p className='text-sm'>Already have an Account? <Link to="/" className='text-blue-700'>Log in</Link></p>
+                        <p className='text-sm'>Already have an Account? <Link to="/login" className='text-blue-700'>Log in</Link></p>
                     </div>
                 </div>
             </div>
