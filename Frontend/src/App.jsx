@@ -11,6 +11,8 @@ import { ProtectedRoute } from './ProtectedRoute'
 import { useEffect } from 'react'
 import { useMutation } from '@tanstack/react-query'
 import { messageSubscriptionApi } from './apis/user'
+import { LandingPage } from './pages/LandingPage'
+
 
 function App() {
 
