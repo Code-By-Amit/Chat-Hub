@@ -16,7 +16,7 @@ const PushSubscription = require('./models/pushMessageSubscription.model')
 const PORT = process.env.PORT || 4000
 
 app.use(cors({
-    origin: ["https://amit-chathub.netlify.app",'http://localhost:5173', 'http://localhost:3000', "http://192.168.181.232:5173"],
+    origin: ["https://amit-chathub.netlify.app"],
     credentials: true
 }))
 
